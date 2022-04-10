@@ -975,7 +975,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget.show()
 
     def about(self):
-        QMessageBox.about(self,'about','made by mtkiao129')
+        QMessageBox.about(self,'about','made by litesans')
 
     def Rundos(self):
         dos = self.ui.Dos.text()
