@@ -66,10 +66,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.about_us.triggered.connect(self.about)
         self.ui.processlist.clicked.connect(self.processhwnd)
         self.ui.windowkillbut.clicked.connect(self.windowkill)
-        self.ui.processlist.setContextMenuPolicy(Qt.CustomContextMenu)  ######允许右键产生子菜单
-        self.ui.processlist.customContextMenuRequested.connect(self.generateMenu)  ####右键菜单
-        self.ui.windowkillview.setContextMenuPolicy(Qt.CustomContextMenu)  ######允许右键产生子菜单
-        self.ui.windowkillview.customContextMenuRequested.connect(self.delexekill)  ####右键菜单
+        self.ui.processlist.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.processlist.customContextMenuRequested.connect(self.generateMenu)
+        self.ui.windowkillview.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.windowkillview.customContextMenuRequested.connect(self.delexekill)
         self.ui.stoping.setChecked(True)
         self.ui.stoping.toggled.connect(self.setRunning)
         self.ui.Running.toggled.connect(self.setRunning)
