@@ -1,10 +1,12 @@
-import getpass,subprocess,configparser
+import getpass,subprocess,configparser,pefile
+import platform
 from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtWidgets import QFileDialog,QMessageBox,QMenu,QAction
 from info import Ui_info
 import win32gui
 import dialog
 import qdarkstyle
+from fun import fun_list
 from PyQt5.QtCore import QStringListModel,QTimer,Qt
 from UI import Ui_MainWindow
 import os,win32process
@@ -35,9 +37,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System),"系統")
         self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe),"系統程式")
         self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill),"窗口攔截")
-        self.timer=QTimer() # init QTimer
-        self.timer.timeout.connect(self.listprocess) # when timeout, do run one
-        self.timer.start(1000) # start Timer, here we set '1ms' while timeout one time
+        self.timer=QTimer()
+        self.timer.timeout.connect(self.listprocess)
+        self.timer.start(1000)
         self.applist=QTimer()
         self.applist.timeout.connect(self.windowlist)
         self.applist.start(1000)
@@ -61,10 +63,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Shutdownbut.clicked.connect(self.Shutdown)
         self.ui.resetbut.clicked.connect(self.reset)
         self.ui.RunDos.clicked.connect(self.Rundos)
-        self.ui.filebut.clicked.connect(self.fileopen)
+        self.ui.execheck.clicked.connect(self.check)
         self.ui.systeminfobut.clicked.connect(self.systeminfogrt)
         self.ui.about_us.triggered.connect(self.about)
         self.ui.processlist.clicked.connect(self.processhwnd)
+        self.ui.processlist.clicked.connect(self.processuser)
         self.ui.windowkillbut.clicked.connect(self.windowkill)
         self.ui.processlist.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.processlist.customContextMenuRequested.connect(self.generateMenu)
@@ -87,7 +90,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exekill=QTimer()
         self.exekill.timeout.connect(self.killwindow)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
-        self.shell32dll = windll.LoadLibrary(r"C:\Windows\System32\shell32.dll") 
 
     def windowkill(self):
         config = configparser.RawConfigParser()
@@ -105,7 +107,6 @@ class MainWindow(QtWidgets.QMainWindow):
         config = configparser.RawConfigParser()
         config.read('stg.ini')
         section = config.options('app')
-
         self.configlist.setStringList(section)
         self.ui.windowkillview.setModel(self.configlist)
     
@@ -163,12 +164,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.qList_pid = []
         self.qList_exe = []
         self.qList_name = []
+        self.qList_user = []
         for p in psutil.process_iter():
             try:
                 self.qList.append(p.name() +"  "+ str(p.pid) +"        "+ p.exe())
                 self.qList_pid.append(p.pid)
                 self.qList_exe.append(p.exe())
                 self.qList_name.append(p.name())
+                self.qList_user.append(p.username())
             except:
                 pass
         self.slm.setStringList(self.qList)
@@ -243,6 +246,20 @@ class MainWindow(QtWidgets.QMainWindow):
             win32api.RegSetValueEx(key, 'NoStartMenuMyMusic', 0, win32con.REG_DWORD, 0)
             win32api.RegSetValueEx(key, 'NoStartMenuNetworkPlaces', 0, win32con.REG_DWORD, 0)
             win32api.RegSetValueEx(key, 'NoStartMenuPinnedList', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoActiveDesktop', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoActiveDesktopChanges', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoChangeStartMenu', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'ClearRecentDocsOnExit', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoFavoritesMenu', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoRecentDocsHistory', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoSetTaskbar', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoSMHelp', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoTrayContextMenu', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoViewContextMenu', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoWindowUpdate', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'NoWinKeys', 0, win32con.REG_DWORD, 0)
+            win32api.RegSetValueEx(key, 'StartMenuLogOff', 0, win32con.REG_DWORD, 0)
+            win32api.RegCloseKey(key)
 
             try:
                 key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS)
@@ -315,8 +332,39 @@ class MainWindow(QtWidgets.QMainWindow):
                 key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegCreateKey(key,'ActiveDesktop')
                 key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\ActiveDesktop',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValueEx(key, 'NoAddingComponents', 0, win32con.REG_DWORD, 0)
             win32api.RegSetValueEx(key, 'NoComponents', 0, win32con.REG_DWORD, 0)
+            win32api.RegCloseKey(key)
+
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Policies\Microsoft\Windows',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'System')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'DisableCMD', 0, win32con.REG_DWORD, 0)
+            win32api.RegCloseKey(key)
+    
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Policies\Microsoft\Windows',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'System')
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'DisableCMD', 0, win32con.REG_DWORD, 0)
+            win32api.RegCloseKey(key)
+
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC\{8FC0B734-A0E1-11D1-A7D3-0000F87571E3}',0,win32con.KEY_ALL_ACCESS)
+            except:
+                try:
+                    key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC',0,win32con.KEY_ALL_ACCESS)
+                except:
+                    key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegCreateKey(key,'MMC')
+                    key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'{8FC0B734-A0E1-11D1-A7D3-0000F87571E3}')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC\{8FC0B734-A0E1-11D1-A7D3-0000F87571E3}',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'Restrict_Run', 0, win32con.REG_DWORD, 0)
             win32api.RegCloseKey(key)
 
             if self.language == 1:
@@ -458,7 +506,7 @@ class MainWindow(QtWidgets.QMainWindow):
             _translate = QtCore.QCoreApplication.translate
             self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">command</span></p></body></html>"))
             self.ui.RunDos.setText(_translate("MainWindow", "Run"))
-            self.ui.filebut.setText(_translate("MainWindow", "exe analyse"))
+            self.ui.exeuser.setText(_translate("MainWindow", "exe analyse"))
             self.ui.processname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">name</span></p></body></html>"))
             self.ui.processPID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
             self.ui.processfile.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe path</span></p></body></html>"))
@@ -491,6 +539,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.English.setText(_translate("MainWindow", "English"))
             self.ui.Chinese_T.setText(_translate("MainWindow", "traditional Chinese"))
             self.ui.Chinese_S.setText(_translate("MainWindow", "Simplified Chinese"))
+            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill), _translate("MainWindow", "window blocking"))
+            self.ui.hint.setText(_translate("MainWindow", "Operating status"))
+            self.ui.Running.setText(_translate("MainWindow", "Run"))
+            self.ui.stoping.setText(_translate("MainWindow", "Stop"))
+            self.ui.windowkillbut.setText(_translate("MainWindow", "Ok"))
+            self.ui.windowkilllist.setText(_translate("MainWindow", "Blocking window list"))
+            self.ui.windowhint.setText(_translate("MainWindow", "Please enter the name of the window you want to block"))
+            self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">file name:</span></p></body></html>"))
+            self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">file path:</span></p></body></html>"))
+            self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">DLLs and functions called by the analyzed file and descriptions</span></p></body></html>"))
+            self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">Dangerous:</span></p></body></html>"))
+            self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
+            self.ui.Danger_degreehint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">Description: Dangerous degree index range: 0~10</span></p></body></html>"))
+            self.ui.execheck.setText(_translate("MainWindow", "file analysis"))
             self.ui.fixlimitbut.setGeometry(QtCore.QRect(10, 10, 100, 30))
             self.ui.fiximgbut.setGeometry(QtCore.QRect(120, 10, 120, 30))
             self.ui.resetexplorerbut.setGeometry(QtCore.QRect(560, 10, 90, 30))
@@ -512,20 +574,29 @@ class MainWindow(QtWidgets.QMainWindow):
         if quse == 16384:
             self.language = 2
             _translate = QtCore.QCoreApplication.translate
-            self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">CMD命令</span></p></body></html>"))
-            self.ui.RunDos.setText(_translate("MainWindow", "執行"))
-            self.ui.filebut.setText(_translate("MainWindow", "程式分析"))
+            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools),"工具")
+            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.process),"進程")
+            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System),"系統")
+            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe),"系統程式")
+            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill),"窗口攔截")
+            self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
             self.ui.processname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">名稱</span></p></body></html>"))
             self.ui.processPID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
             self.ui.processfile.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe路徑</span></p></body></html>"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.process), _translate("MainWindow", "進程"))
+            self.ui.hwnd.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">句柄:</span></p></body></html>"))
+            self.ui.exeuser.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">使用者名稱:</span></p></body></html>"))
             self.ui.resetexplorerbut.setText(_translate("MainWindow", "重啟資源管理器"))
             self.ui.cleanuserpwbut.setText(_translate("MainWindow", "解除用戶密碼"))
             self.ui.fixlimitbut.setText(_translate("MainWindow", "解除系統限制"))
             self.ui.fiximgbut.setText(_translate("MainWindow", "修復打開方式"))
             self.ui.fixiconbut.setText(_translate("MainWindow", "修復程式圖標"))
             self.ui.fixexeimgbut.setText(_translate("MainWindow", "修復映像劫持"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools), _translate("MainWindow", "工具"))
+            self.ui.Shutdownbut.setText(_translate("MainWindow", "強制關機"))
+            self.ui.resetbut.setText(_translate("MainWindow", "強制重啟"))
+            self.ui.setUAC.setText(_translate("MainWindow", "設定UAC"))
+            self.ui.systeminfobut.setText(_translate("MainWindow", "系統資訊"))
+            self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">CMD命令</span></p></body></html>"))
+            self.ui.RunDos.setText(_translate("MainWindow", "執行"))
             self.ui.Taskbut.setText(_translate("MainWindow", "Taskmgr"))
             self.ui.Powershellbut.setText(_translate("MainWindow", "Powershell"))
             self.ui.regebut.setText(_translate("MainWindow", "Regedit"))
@@ -533,20 +604,27 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.Gpeditbut.setText(_translate("MainWindow", "Gpedit"))
             self.ui.controlbut.setText(_translate("MainWindow", "Control"))
             self.ui.MMCbut.setText(_translate("MainWindow", "MMC"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe), _translate("MainWindow", "系統程式"))
-            self.ui.Shutdownbut.setText(_translate("MainWindow", "強制關機"))
-            self.ui.resetbut.setText(_translate("MainWindow", "強制重啟"))
-            self.ui.setUAC.setText(_translate("MainWindow", "設定UAC"))
-            self.ui.systeminfobut.setText(_translate("MainWindow", "系統資訊"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System), _translate("MainWindow", "系統"))
+            self.ui.windowhint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">請輸入要攔截窗口的名稱</span></p></body></html>"))
+            self.ui.windowkillbut.setText(_translate("MainWindow", "確定"))
+            self.ui.windowkilllist.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">攔截窗口名單</span></p></body></html>"))
+            self.ui.hint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">運行狀態:</span></p></body></html>"))
+            self.ui.stoping.setText(_translate("MainWindow", "停止"))
+            self.ui.Running.setText(_translate("MainWindow", "運行"))
+            self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件名:</span></p></body></html>"))
+            self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件路徑:</span></p></body></html>"))
+            self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">受分析的文件調用的DLL及函數及說明</span></p></body></html>"))
+            self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">危險程度:</span></p></body></html>"))
+            self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
+            self.ui.Danger_degreehint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">說明:危險程度指標範圍:0~10</span></p></body></html>"))
             self.ui.menu.setTitle(_translate("MainWindow", "功能"))
             self.ui.menu_3.setTitle(_translate("MainWindow", "語言"))
             self.ui.menu_2.setTitle(_translate("MainWindow", "關於"))
+            self.ui.video_view.setText(_translate("MainWindow", "video view"))
             self.ui.Close.setText(_translate("MainWindow", "關閉"))
-            self.ui.about_us.setText(_translate("MainWindow", "關於"))
-            self.ui.English.setText(_translate("MainWindow", "英文"))
-            self.ui.Chinese_T.setText(_translate("MainWindow", "繁體中文"))
-            self.ui.Chinese_S.setText(_translate("MainWindow", "簡體中文"))
+            self.ui.about_us.setText(_translate("MainWindow", "about"))
+            self.ui.English.setText(_translate("MainWindow", "English"))
+            self.ui.Chinese_T.setText(_translate("MainWindow", "traditional Chinese"))
+            self.ui.Chinese_S.setText(_translate("MainWindow", "Simplified Chinese"))
             self.ui.fixlimitbut.setGeometry(QtCore.QRect(10, 10, 90, 30))
             self.ui.fiximgbut.setGeometry(QtCore.QRect(110, 10, 90, 30))
             self.ui.resetexplorerbut.setGeometry(QtCore.QRect(510, 10, 90, 30))
@@ -568,9 +646,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if quse == 16384:
             self.language = 3
             _translate = QtCore.QCoreApplication.translate
+            self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
             self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">CMD命令</span></p></body></html>"))
             self.ui.RunDos.setText(_translate("MainWindow", "执行"))
-            self.ui.filebut.setText(_translate("MainWindow", "软件分析"))
+            self.ui.exeuser.setText(_translate("MainWindow", "软件分析"))
             self.ui.processname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">名称</span></p></body></html>"))
             self.ui.processPID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
             self.ui.processfile.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe路径</span></p></body></html>"))
@@ -603,6 +682,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.ui.English.setText(_translate("MainWindow", "英语"))
             self.ui.Chinese_T.setText(_translate("MainWindow", "繁体中文"))
             self.ui.Chinese_S.setText(_translate("MainWindow", "简体中文"))
+
+            self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件名:</span></p></body></html>"))
+            self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件路径:</span></p></body></html>"))
+            self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">受分析的文件调用的DLL及函数及说明</span></p></body></html>"))
+            self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">危险程度:</span></p></body></html>"))
+            self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
+            self.ui.Danger_degreehint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">说明:危险程度指标范围:0~10</span></p></body></html>"))
+            self.ui.menu.setTitle(_translate("MainWindow", "功能"))
             self.ui.fixlimitbut.setGeometry(QtCore.QRect(10, 10, 90, 30))
             self.ui.fiximgbut.setGeometry(QtCore.QRect(110, 10, 90, 30))
             self.ui.resetexplorerbut.setGeometry(QtCore.QRect(510, 10, 90, 30))
@@ -735,6 +822,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if hwndpid == self.pid:       
                 self.ui.hwndview.setText(str(h))
                 hwnd = h
+        self.processuser()
         self.popMenu = QMenu()
         if self.language == 1:
             text = 'end process'
@@ -833,6 +921,17 @@ class MainWindow(QtWidgets.QMainWindow):
         except:
             pass
 
+    def processuser(self):
+        try:
+            self.ui.exeuserview.setText('')
+            item = self.ui.processlist.selectedIndexes()
+            for i in item:
+                item = i.row()
+                username = self.qList_user[item]
+            self.ui.exeuserview.setText(username)
+        except:
+            pass
+
     def fixicon(self):
         if self.language == 1:
             text = 'Are you sure you want to fix the program icon?'
@@ -843,23 +942,46 @@ class MainWindow(QtWidgets.QMainWindow):
         ques = QMessageBox.warning(self,'FixIcon',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
         if ques == 16384:
             import win32api,win32con
-            key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'exefile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%1')
-            key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'comfile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\System32\shell32.dll,2')
-            key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'txtfile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\system32\imageres.dll,-102')
-            key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'dllfile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, 'C:\Windows\system32\imageres.dll,-67')
-
-            key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%1')
-            key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\System32\shell32.dll,2')
-            key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\\txtfile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\system32\imageres.dll,-102')
-            key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\dllfile',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, 'C:\Windows\system32\imageres.dll,-67')
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'exefile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%1')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'comfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\System32\shell32.dll,2')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'txtfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\system32\imageres.dll,-102')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'dllfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, 'C:\Windows\system32\imageres.dll,-67')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%1')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\System32\shell32.dll,2')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\\txtfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\system32\imageres.dll,-102')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\dllfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, 'C:\Windows\system32\imageres.dll,-67')
+            except:
+                pass
             win32api.CloseHandle(key)
             if self.language == 1:
                 text = 'Repair done!'
@@ -959,6 +1081,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         cpu = psutil.cpu_count(logical=False)
         cpu_logical = psutil.cpu_count()
+        systeminfo = platform.version()
+        systembit = platform.architecture()
         # self.cpuuse = psutil.cpu_percent(interval=0.5, percpu=True)
         # self.cpu_freq = psutil.cpu_freq()
         # self.ram = psutil.virtual_memory()
@@ -966,7 +1090,8 @@ class MainWindow(QtWidgets.QMainWindow):
         _translate = QtCore.QCoreApplication.translate
         self.infoui.cpus.setText(_translate("info", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">" + str(cpu) + "</span></p></body></html>"))
         self.infoui.cpu_logs.setText(_translate("info", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">" + str(cpu_logical) + "</span></p></body></html>"))
-
+        self.infoui.systemversions.setText(_translate("info", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">" + str(systeminfo) + "</span></p></body></html>"))
+        self.infoui.system_bits.setText(_translate("info", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">" + str(systembit) + "</span></p></body></html>"))
 
     def uac(self):
         self.widget = QtWidgets.QDialog()
@@ -975,7 +1100,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget.show()
 
     def about(self):
-        QMessageBox.about(self,'about','made by litesans')
+        QMessageBox.about(self,'about','made by mtkiao129(litesans)')
 
     def Rundos(self):
         dos = self.ui.Dos.text()
@@ -1006,11 +1131,45 @@ class MainWindow(QtWidgets.QMainWindow):
                     text = '执行成功!'
                 QMessageBox.information(self,'Done',text,QMessageBox.Ok,QMessageBox.Ok)
     
-    def fileopen(self):
-        filename, filetype = QFileDialog.getOpenFileName(self,
-                  "Open file",
-                  "./")                 # start path
-        print(filename, filetype)
+    def check(self):
+        filepath, filetype= QFileDialog.getOpenFileName(self,"程式分析","./",'EXE Files *.exe;;COM Files *.com;;SCR Files *.scr')     
+        if not filepath:
+            pass
+        else:
+            filename = filepath
+            a = 0
+            while True:
+                if filename[a] == '/':
+                    a = a + 1
+                    filename = filepath[a:]
+                    self.ui.exechecknameview.setText(filename)
+                    break
+                else:
+                    a = a - 1
+            self.ui.execheckpathview.setText(filepath)
+            try:
+                exefile = pefile.PE(filepath) 
+            except:
+                QMessageBox.critical(self,'error','發生錯誤',QMessageBox.Ok)
+            self.execheck=QStringListModel()
+            self.execheckdll = []
+            self.execheckfun = []
+            try:
+                for entry in exefile.DIRECTORY_ENTRY_IMPORT: 
+                    try:
+                        self.execheckdll.append(str(entry.dll))
+                    except:
+                        pass
+                    for function in entry.imports: 
+                        try:
+                            self.execheckfun.append(str(function.name) + '  說明:' +fun_list[str(function.name)])
+                        except:
+                            self.execheckfun.append(str(function.name) + '  說明: (未知)')
+            except:
+                pass
+            self.execheck.setStringList(self.execheckdll + self.execheckfun)
+            self.ui.execheckview.setModel(self.execheck)
+
 
     def beautification(self):
         # self.ui.centralwidget.setStyleSheet('''
