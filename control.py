@@ -1,19 +1,15 @@
-import getpass,subprocess,configparser,pefile
-import platform
+#導入模塊
+import getpass,subprocess,configparser,pefile,platform,win32gui,dialog,qdarkstyle,win32process,psutil
 from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtWidgets import QFileDialog,QMessageBox,QMenu,QAction
 from info import Ui_info
-import win32gui
-import dialog
-import qdarkstyle
 from fun import fun_list
 from PyQt5.QtCore import QStringListModel,QTimer,Qt
 from UI import Ui_MainWindow
-import os,win32process
 from ctypes import windll
-import psutil
 
-def is_admin(): # 判斷是否有管理員權限
+# 判斷是否有管理員權限
+def is_admin():
     try:
         return windll.shell32.IsUserAnAdmin()
     except:
@@ -21,7 +17,6 @@ def is_admin(): # 判斷是否有管理員權限
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
-        # in python3, super(Class, self).xxx = super().xxx
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.UAC = ''
@@ -37,12 +32,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System),"系統")
         self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe),"系統程式")
         self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill),"窗口攔截")
-        self.timer=QTimer()
-        self.timer.timeout.connect(self.listprocess)
-        self.timer.start(1000)
-        self.applist=QTimer()
-        self.applist.timeout.connect(self.windowlist)
-        self.applist.start(1000)
         self.ui.Close.triggered.connect(self.close)
         self.ui.English.triggered.connect(self.english)
         self.ui.Chinese_T.triggered.connect(self.chinese_t)
@@ -68,30 +57,33 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.about_us.triggered.connect(self.about)
         self.ui.processlist.clicked.connect(self.processhwnd)
         self.ui.processlist.clicked.connect(self.processuser)
-        self.ui.windowkillbut.clicked.connect(self.windowkill)
+        self.ui.windowkillbut.clicked.connect(self.window_blocking)
         self.ui.processlist.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.processlist.customContextMenuRequested.connect(self.generateMenu)
         self.ui.windowkillview.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.windowkillview.customContextMenuRequested.connect(self.delexekill)
-        self.ui.stoping.setChecked(True)
         self.ui.stoping.toggled.connect(self.setRunning)
         self.ui.Running.toggled.connect(self.setRunning)
         #dialog
         self.ui.setUAC.clicked.connect(self.uac)
-        #beautification
+        #timer
         self.beautificationA=QTimer()
         self.beautificationA.timeout.connect(self.beautification)
         self.beautificationA.start(1000)
-        self.language = 2
-
-        # self.Language_config = configparser.RawConfigParser()
-        # self.Language_config.read('stg.ini')
-        # self.language = self.Language_config.getint('Language','Languages')
+        self.timer=QTimer()
+        self.timer.timeout.connect(self.listprocess)
+        self.timer.start(1000)
+        self.applist=QTimer()
+        self.applist.timeout.connect(self.windowlist)
+        self.applist.start(1000)
         self.exekill=QTimer()
         self.exekill.timeout.connect(self.killwindow)
+        #other
+        self.language = 2
+        self.ui.stoping.setChecked(True)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
 
-    def windowkill(self):
+    def window_blocking(self):
         config = configparser.RawConfigParser()
         config.read('stg.ini')
         self.windowinfo = self.ui.windowkillname.text()
@@ -99,11 +91,16 @@ class MainWindow(QtWidgets.QMainWindow):
             config.set('app', self.windowinfo, True)
             config.write(open('stg.ini', 'w'))
         else:
-            QMessageBox.critical(self,'error','請輸入名稱',QMessageBox.Ok)
+            if self.language == 1:
+                text = 'Please enter a name!'
+            if self.language == 2:
+                text = '請輸入名稱!'
+            if self.language == 3:
+                text = '请输入名称!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
     def windowlist(self):
         self.configlist=QStringListModel()
-
         config = configparser.RawConfigParser()
         config.read('stg.ini')
         section = config.options('app')
@@ -127,7 +124,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exeitem = self.ui.windowkillview.selectedIndexes()
         for i in self.exeitem:
             exeitem = i.data()
-
         self.exekillview = QMenu()
         if self.language == 1:
             text = 'delete'
@@ -139,10 +135,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exekillview.addAction(delexe)
         ques = self.exekillview.exec_(self.ui.windowkillview.mapToGlobal(pos))
         if ques == delexe:
-            for i in config.options('app'):
-                if i == exeitem:
-                    config.remove_option('app', i)
-                    config.write(open('stg.ini', 'w'))
+            try:
+                for i in config.options('app'):
+                    if i == exeitem:
+                        config.remove_option('app', i)
+                        config.write(open('stg.ini', 'w'))
+            except:
+                pass
         
     def setRunning(self):
         if self.ui.Running.isChecked():
@@ -151,12 +150,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.exekill.stop()
 
     def OpenProcess0(self,exe):
-        handle = win32process.CreateProcess(exe,
-            "", None, None, 0,
-            win32process.CREATE_NO_WINDOW, 
-                None, 
-                None,
-                win32process.STARTUPINFO())
+        win32process.CreateProcess(exe,"", None, None, 0,win32process.CREATE_NO_WINDOW, None, None,win32process.STARTUPINFO())
 
     def listprocess(self):
         self.slm=QStringListModel()
@@ -167,7 +161,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.qList_user = []
         for p in psutil.process_iter():
             try:
-                self.qList.append(p.name() +"  "+ str(p.pid) +"        "+ p.exe())
+                self.qList.append(p.name() +"   "+ str(p.pid) +"        "+ p.exe())
                 self.qList_pid.append(p.pid)
                 self.qList_exe.append(p.exe())
                 self.qList_name.append(p.name())
@@ -176,38 +170,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 pass
         self.slm.setStringList(self.qList)
         self.ui.processlist.setModel(self.slm)
-
-        # a = self.ui.processlist.model()
         # #獲取數量
         # count = self.slm.rowCount()
-
-        self.ui.processlist.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.ui.processlist.setStyleSheet('''
-        QWidget::item
-        {
-        background-color: #393d49;
-        color: #00BFFF;
-        border: transparent;
-        border-bottom: 1px solid #dbdbdb;
-        padding: 5px;
-        }
-
-        QWidget::item:hover
-        {
-        background-color: #5F5F5F;
-        padding: 6px;
-        }
-
-        QWidget::item:selected
-        {
-        border-left: 5px solid #777777;
-        }
-
-        QListView
-        {
-        outline: none;
-        }
-        ''')
 
     def fixlimit(self):
         if self.language == 1:
@@ -216,8 +180,8 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要解除系統限制嗎?'
         if self.language == 3:
             text = '确定要解除系统限制吗?'
-        ques = QMessageBox.warning(self,'FixLimit',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
+        question = QMessageBox.warning(self,'FixLimit',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
             import win32api,win32con
             try:
                 key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS)
@@ -382,116 +346,125 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要修復文件打開方式嗎?'
         if self.language == 3:
             text = '确定要修复文件打开方式吗?'
-        ques = QMessageBox.warning(self,'Fixexeopen',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
+        question = QMessageBox.warning(self,'Fixexeopen',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
             import win32api,win32con
-            key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
-            win32api.RegSetValue(key, '.exe', win32con.REG_SZ, 'exefile')
-            win32api.RegSetValue(key, 'exefile', win32con.REG_SZ, 'Application')
-            win32api.RegSetValue(key, '.com', win32con.REG_SZ, 'comfile')
-            win32api.RegSetValue(key, 'comfile', win32con.REG_SZ, 'MS-DOS Application')
-            win32api.RegSetValue(key, '.scr', win32con.REG_SZ, 'scrfile')
-            win32api.RegSetValue(key, 'scrfile', win32con.REG_SZ, 'Screen saver')
-            win32api.RegSetValue(key, '.zip', win32con.REG_SZ, 'CompressedFolder')
-            win32api.RegSetValue(key, '.dll', win32con.REG_SZ, 'dllfile')
-            win32api.RegSetValue(key, 'dllfile', win32con.REG_SZ, 'Application Extension')
-            win32api.RegSetValue(key, '.sys', win32con.REG_SZ, 'sysfile')
-            win32api.RegSetValue(key, 'sysfile', win32con.REG_SZ, 'System file')
-            win32api.RegSetValue(key, '.bat', win32con.REG_SZ, 'batfile')
-            win32api.RegSetValue(key, 'batfile', win32con.REG_SZ, 'Windows Batch File')
-            win32api.RegSetValue(key, 'VBS', win32con.REG_SZ, 'VB Script Language')
-            win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
-            win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
-            win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
-            win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
-            win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-            win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
+                win32api.RegSetValue(key, '.exe', win32con.REG_SZ, 'exefile')
+                win32api.RegSetValue(key, 'exefile', win32con.REG_SZ, 'Application')
+                win32api.RegSetValue(key, '.com', win32con.REG_SZ, 'comfile')
+                win32api.RegSetValue(key, 'comfile', win32con.REG_SZ, 'MS-DOS Application')
+                win32api.RegSetValue(key, '.scr', win32con.REG_SZ, 'scrfile')
+                win32api.RegSetValue(key, 'scrfile', win32con.REG_SZ, 'Screen saver')
+                win32api.RegSetValue(key, '.zip', win32con.REG_SZ, 'CompressedFolder')
+                win32api.RegSetValue(key, '.dll', win32con.REG_SZ, 'dllfile')
+                win32api.RegSetValue(key, 'dllfile', win32con.REG_SZ, 'Application Extension')
+                win32api.RegSetValue(key, '.sys', win32con.REG_SZ, 'sysfile')
+                win32api.RegSetValue(key, 'sysfile', win32con.REG_SZ, 'System file')
+                win32api.RegSetValue(key, '.bat', win32con.REG_SZ, 'batfile')
+                win32api.RegSetValue(key, 'batfile', win32con.REG_SZ, 'Windows Batch File')
+                win32api.RegSetValue(key, 'VBS', win32con.REG_SZ, 'VB Script Language')
+                win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
+                win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
+                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
+                win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
+                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
 
-            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
-            win32api.RegSetValue(key, '.exe', win32con.REG_SZ, 'exefile')
-            win32api.RegSetValue(key, 'exefile', win32con.REG_SZ, 'Application')
-            win32api.RegSetValue(key, '.com', win32con.REG_SZ, 'comfile')
-            win32api.RegSetValue(key, 'comfile', win32con.REG_SZ, 'MS-DOS Application')
-            win32api.RegSetValue(key, '.scr', win32con.REG_SZ, 'scrfile')
-            win32api.RegSetValue(key, 'scrfile', win32con.REG_SZ, 'Screen saver')
-            win32api.RegSetValue(key, '.zip', win32con.REG_SZ, 'CompressedFolder')
-            win32api.RegSetValue(key, '.dll', win32con.REG_SZ, 'dllfile')
-            win32api.RegSetValue(key, 'dllfile', win32con.REG_SZ, 'Application Extension')
-            win32api.RegSetValue(key, '.sys', win32con.REG_SZ, 'sysfile')
-            win32api.RegSetValue(key, 'sysfile', win32con.REG_SZ, 'System file')
-            win32api.RegSetValue(key, '.bat', win32con.REG_SZ, 'batfile')
-            win32api.RegSetValue(key, 'batfile', win32con.REG_SZ, 'Windows Batch File')
-            win32api.RegSetValue(key, 'VBS', win32con.REG_SZ, 'VB Script Language')
-            win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
-            win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
-            win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
-            win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
-            win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-            win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
+                win32api.RegSetValue(key, '.exe', win32con.REG_SZ, 'exefile')
+                win32api.RegSetValue(key, 'exefile', win32con.REG_SZ, 'Application')
+                win32api.RegSetValue(key, '.com', win32con.REG_SZ, 'comfile')
+                win32api.RegSetValue(key, 'comfile', win32con.REG_SZ, 'MS-DOS Application')
+                win32api.RegSetValue(key, '.scr', win32con.REG_SZ, 'scrfile')
+                win32api.RegSetValue(key, 'scrfile', win32con.REG_SZ, 'Screen saver')
+                win32api.RegSetValue(key, '.zip', win32con.REG_SZ, 'CompressedFolder')
+                win32api.RegSetValue(key, '.dll', win32con.REG_SZ, 'dllfile')
+                win32api.RegSetValue(key, 'dllfile', win32con.REG_SZ, 'Application Extension')
+                win32api.RegSetValue(key, '.sys', win32con.REG_SZ, 'sysfile')
+                win32api.RegSetValue(key, 'sysfile', win32con.REG_SZ, 'System file')
+                win32api.RegSetValue(key, '.bat', win32con.REG_SZ, 'batfile')
+                win32api.RegSetValue(key, 'batfile', win32con.REG_SZ, 'Windows Batch File')
+                win32api.RegSetValue(key, 'VBS', win32con.REG_SZ, 'VB Script Language')
+                win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
+                win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
+                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
+                win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
+                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
 
-            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, '.exe', win32con.REG_SZ, '')
-            win32api.RegSetValue(key, '.zip', win32con.REG_SZ, '')
-            win32api.RegSetValue(key, '.dll', win32con.REG_SZ, '')
-            win32api.RegSetValue(key, '.sys', win32con.REG_SZ, '')
-            win32api.RegSetValue(key, '.bat', win32con.REG_SZ, '')
-            win32api.RegSetValue(key, '.txt', win32con.REG_SZ, '')
-            win32api.RegSetValue(key, '.msc', win32con.REG_SZ, '')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, '.exe', win32con.REG_SZ, '')
+                win32api.RegSetValue(key, '.zip', win32con.REG_SZ, '')
+                win32api.RegSetValue(key, '.dll', win32con.REG_SZ, '')
+                win32api.RegSetValue(key, '.sys', win32con.REG_SZ, '')
+                win32api.RegSetValue(key, '.bat', win32con.REG_SZ, '')
+                win32api.RegSetValue(key, '.txt', win32con.REG_SZ, '')
+                win32api.RegSetValue(key, '.msc', win32con.REG_SZ, '')
 
-            key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,None,0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
-            win32api.RegSetValue(key, '.exe', win32con.REG_SZ, 'exefile')
-            win32api.RegSetValue(key, 'exefile', win32con.REG_SZ, 'Application')
-            win32api.RegSetValue(key, '.com', win32con.REG_SZ, 'comfile')
-            win32api.RegSetValue(key, 'comfile', win32con.REG_SZ, 'MS-DOS Application')
-            win32api.RegSetValue(key, '.scr', win32con.REG_SZ, 'scrfile')
-            win32api.RegSetValue(key, 'scrfile', win32con.REG_SZ, 'Screen saver')
-            win32api.RegSetValue(key, '.zip', win32con.REG_SZ, 'CompressedFolder')
-            win32api.RegSetValue(key, '.dll', win32con.REG_SZ, 'dllfile')
-            win32api.RegSetValue(key, 'dllfile', win32con.REG_SZ, 'Application Extension')
-            win32api.RegSetValue(key, '.sys', win32con.REG_SZ, 'sysfile')
-            win32api.RegSetValue(key, 'sysfile', win32con.REG_SZ, 'System file')
-            win32api.RegSetValue(key, '.bat', win32con.REG_SZ, 'batfile')
-            win32api.RegSetValue(key, 'batfile', win32con.REG_SZ, 'Windows Batch File')
-            win32api.RegSetValue(key, '.cmd', win32con.REG_SZ, 'cmdfile')
-            win32api.RegSetValue(key, 'cmdfile', win32con.REG_SZ, 'Windows Command Script')
-            win32api.RegSetValue(key, '.vbs', win32con.REG_SZ, 'VBSfile')
-            win32api.RegSetValue(key, 'VBS', win32con.REG_SZ, 'VB Script Language')
-            win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
-            win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
-            win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
-            win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
-            win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-            win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-            keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-            win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
-            win32api.RegCloseKey(key)
-            win32api.RegCloseKey(keyopen)
-            if self.language == 1:
-                text = 'Repair file open method successfully!'
-            if self.language == 2:
-                text = '修復文件打開方式成功!'
-            if self.language == 3:
-                text = '修复文件打开方式成功!'
-            QMessageBox.information(self,'Fixexeopen',text,QMessageBox.Ok,QMessageBox.Ok)
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,None,0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
+                win32api.RegSetValue(key, '.exe', win32con.REG_SZ, 'exefile')
+                win32api.RegSetValue(key, 'exefile', win32con.REG_SZ, 'Application')
+                win32api.RegSetValue(key, '.com', win32con.REG_SZ, 'comfile')
+                win32api.RegSetValue(key, 'comfile', win32con.REG_SZ, 'MS-DOS Application')
+                win32api.RegSetValue(key, '.scr', win32con.REG_SZ, 'scrfile')
+                win32api.RegSetValue(key, 'scrfile', win32con.REG_SZ, 'Screen saver')
+                win32api.RegSetValue(key, '.zip', win32con.REG_SZ, 'CompressedFolder')
+                win32api.RegSetValue(key, '.dll', win32con.REG_SZ, 'dllfile')
+                win32api.RegSetValue(key, 'dllfile', win32con.REG_SZ, 'Application Extension')
+                win32api.RegSetValue(key, '.sys', win32con.REG_SZ, 'sysfile')
+                win32api.RegSetValue(key, 'sysfile', win32con.REG_SZ, 'System file')
+                win32api.RegSetValue(key, '.bat', win32con.REG_SZ, 'batfile')
+                win32api.RegSetValue(key, 'batfile', win32con.REG_SZ, 'Windows Batch File')
+                win32api.RegSetValue(key, '.cmd', win32con.REG_SZ, 'cmdfile')
+                win32api.RegSetValue(key, 'cmdfile', win32con.REG_SZ, 'Windows Command Script')
+                win32api.RegSetValue(key, '.vbs', win32con.REG_SZ, 'VBSfile')
+                win32api.RegSetValue(key, 'VBS', win32con.REG_SZ, 'VB Script Language')
+                win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
+                win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
+                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
+                win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
+                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+                win32api.RegCloseKey(key)
+                win32api.RegCloseKey(keyopen)
+                if self.language == 1:
+                    text = 'Repair file open method successfully!'
+                if self.language == 2:
+                    text = '修復文件打開方式成功!'
+                if self.language == 3:
+                    text = '修复文件打开方式成功!'
+                QMessageBox.information(self,'Fixexeopen',text,QMessageBox.Ok,QMessageBox.Ok)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred'
+                if self.language == 2:
+                    text = '發生錯誤'
+                if self.language == 3:
+                    text = '发生错误'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
     def english(self):
         if self.language == 1:
@@ -500,8 +473,8 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要切換語言嗎?'
         if self.language == 3:
             text = '确定要切换语言吗?'
-        quse = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
-        if quse == 16384:
+        qusetion = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
+        if qusetion == 16384:
             self.language = 1
             _translate = QtCore.QCoreApplication.translate
             self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">command</span></p></body></html>"))
@@ -570,8 +543,8 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要切換語言嗎?'
         if self.language == 3:
             text = '确定要切换语言吗?'
-        quse = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
-        if quse == 16384:
+        qusetion = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
+        if qusetion == 16384:
             self.language = 2
             _translate = QtCore.QCoreApplication.translate
             self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools),"工具")
@@ -642,8 +615,8 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要切換語言嗎?'
         if self.language == 3:
             text = '确定要切换语言吗?'
-        quse = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
-        if quse == 16384:
+        qusetion = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
+        if qusetion == 16384:
             self.language = 3
             _translate = QtCore.QCoreApplication.translate
             self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
@@ -708,8 +681,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def killprocess(self,exe):
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        err = subprocess.call('%s%s' % ("taskkill /F /IM ",exe),startupinfo=si)
-        return err
+        result = subprocess.call('%s%s' % ("taskkill /F /IM ",exe),startupinfo=si)
+        return result
 
     def Taskmgr(self):
         try:
@@ -774,6 +747,31 @@ class MainWindow(QtWidgets.QMainWindow):
                 text = '发生错误!'
             QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
+    def MMC(self):
+        try:
+            self.OpenProcess0(exe=r'C:/Windows/System32/mmc.exe')
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Gpedit(self):
+        try:
+            import win32api
+            win32api.ShellExecute( 0, 'open' , 'gpedit.msc' , None ,None , 1 )
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
     def resetexplorer(self):
         try:
             self.killprocess('explorer.exe')
@@ -794,28 +792,37 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定清除當前用戶的密碼嗎?'
         if self.language == 3:
             text = '确定清除当前用户的密码吗?'
-        ques = QMessageBox.warning(self,'Password',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
-            Username = getpass.getuser()
-            si = subprocess.STARTUPINFO()
-            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            subprocess.call('net user ' + Username + " \"\"",startupinfo=si)
-            if self.language == 1:
-                text = 'Clear user password successfully!'
-            if self.language == 2:
-                text = '清除用戶密碼成功!'
-            if self.language == 3:
-                text = '清除用户密码成功!'
-            QMessageBox.information(self,'Password',text,QMessageBox.Ok,QMessageBox.Ok)
+        question = QMessageBox.warning(self,'Password',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
+            try:
+                Username = getpass.getuser()
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.call('net user ' + Username + " \"\"",startupinfo=si)
+                if self.language == 1:
+                    text = 'Clear user password successfully!'
+                if self.language == 2:
+                    text = '清除用戶密碼成功!'
+                if self.language == 3:
+                    text = '清除用户密码成功!'
+                QMessageBox.information(self,'Password',text,QMessageBox.Ok,QMessageBox.Ok)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred'
+                if self.language == 2:
+                    text = '發生錯誤'
+                if self.language == 3:
+                    text = '发生错误'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
     def get_all_hwnd(self,hwnd,mouse):
         self.hwnd_title.update({hwnd:win32gui.GetWindowText(hwnd)})
 
     def generateMenu(self,pos):  
+        self.ui.hwndview.setText('')
         self.item = self.ui.processlist.selectedIndexes()
         for i in self.item:
             item = i.row()
-            # inf = self.slm.stringList()[item]
             self.pid = self.qList_pid[item]
             self.exefile = self.qList_exe[item]
             self.exename = self.qList_name[item]
@@ -846,8 +853,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.popMenu.addAction(self.killp)
         self.popMenu.addAction(exefile)
         self.exe = self.popMenu.exec_(self.ui.processlist.mapToGlobal(pos))
-        err = 0
-        con = 1
+        error = 0
         if self.exe == self.killp:
             try:
                 self.user32dll.EndTask(hwnd,False,True)
@@ -864,10 +870,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self.language == 3:
                     text2 = '成功'          
                 QMessageBox.information(self,'Done',text + self.exename + text2,QMessageBox.Ok)
-                con = 0
+                error = 0
             except:
-                pass
-            if con == 1:
+                error = 1
+            if error == 1:
                 try:
                     for p in psutil.process_iter():
                         if p.pid == self.pid:
@@ -884,10 +890,11 @@ class MainWindow(QtWidgets.QMainWindow):
                                 text2 = '成功'
                             if self.language == 3:
                                 text2 = '成功'                            
+                            error = 0
                             QMessageBox.information(self,'Done',text + p.name() + text2,QMessageBox.Ok)
                 except:
-                    err = 1
-            if err == 1:
+                    error = 1
+            if error == 1:
                 if self.language == 1:
                     text = 'access denied'
                 if self.language == 2:
@@ -944,8 +951,8 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要修復程式圖標嗎?'
         if self.language == 3:
             text = '确定要修复软件图标吗?'
-        ques = QMessageBox.warning(self,'FixIcon',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
+        question = QMessageBox.warning(self,'FixIcon',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
             import win32api,win32con
             try:
                 key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'exefile',0,win32con.KEY_ALL_ACCESS)
@@ -1003,8 +1010,8 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要修復映像劫持嗎?'
         if self.language == 3:
             text = '确定要修复映像劫持吗?'
-        ques = QMessageBox.warning(self,'Fixexeimg',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
+        question = QMessageBox.warning(self,'Fixexeimg',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
             import win32api,win32con
             key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
             count = win32api.RegQueryInfoKey(key)[0]
@@ -1026,31 +1033,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 text = '修复完成!'
             QMessageBox.information(self,'Done',text,QMessageBox.Ok,QMessageBox.Ok)
 
-    def MMC(self):
-        try:
-            self.OpenProcess0(exe=r'C:/Windows/System32/mmc.exe')
-        except:
-            if self.language == 1:
-                text = 'An error occurred!'
-            if self.language == 2:
-                text = '發生錯誤!'
-            if self.language == 3:
-                text = '发生错误!'
-            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
-
-    def Gpedit(self):
-        try:
-            import win32api
-            win32api.ShellExecute( 0, 'open' , 'gpedit.msc' , None ,None , 1 )
-        except:
-            if self.language == 1:
-                text = 'An error occurred!'
-            if self.language == 2:
-                text = '發生錯誤!'
-            if self.language == 3:
-                text = '发生错误!'
-            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
-
     def Shutdown(self):
         if self.language == 1:
             text = 'Are you sure you want to force shutdown?'
@@ -1058,11 +1040,20 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要強制關機嗎?'
         if self.language == 3:
             text = '确定要强制关机吗?'
-        ques = QMessageBox.warning(self,'Shutdown',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
-            si = subprocess.STARTUPINFO()
-            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            subprocess.call('Shutdown -s -f -t 0', startupinfo=si)
+        question = QMessageBox.warning(self,'Shutdown',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
+            try:
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.call('Shutdown -s -f -t 0',startupinfo=si)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred!'
+                if self.language == 2:
+                    text = '發生錯誤!'
+                if self.language == 3:
+                    text = '发生错误!'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
 
     def reset(self):
@@ -1072,18 +1063,26 @@ class MainWindow(QtWidgets.QMainWindow):
             text = '確定要強制重啟嗎?'
         if self.language == 3:
             text = '确定要强制重启吗?'
-        ques = QMessageBox.warning(self,'Reset',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
-        if ques == 16384:
-            si = subprocess.STARTUPINFO()
-            si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            subprocess.call('Shutdown -r -f -t 0', startupinfo=si)
+        question = QMessageBox.warning(self,'Reset',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
+            try:
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.call('Shutdown -r -f -t 0',startupinfo=si)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred!'
+                if self.language == 2:
+                    text = '發生錯誤!'
+                if self.language == 3:
+                    text = '发生错误!'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
     
     def systeminfogrt(self):
         self.info = QtWidgets.QMainWindow()
         self.infoui = Ui_info()
         self.infoui.setupUi(self.info)
         self.info.show()
-
         cpu = psutil.cpu_count(logical=False)
         cpu_logical = psutil.cpu_count()
         systeminfo = platform.version()
@@ -1118,16 +1117,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 text = '请输入命令!'
             QMessageBox.critical(self,'error',text,QMessageBox.Ok,QMessageBox.Ok)
         else:
-            doscode = os.system(dos)
-            if doscode == 1:
-                if self.language == 1:
-                    text = 'Not a valid command or access denied'
-                if self.language == 2:
-                    text = '不是有效命令或存取被拒'
-                if self.language == 3:
-                    text = '不是有效命令或存取被拒'
-                QMessageBox.critical(self,'error', '\"' + dos + '\"' + text + '\nError Code:1',QMessageBox.Ok,QMessageBox.Ok)
-            elif doscode == 0:
+            try:
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.call(dos,startupinfo=si)
                 if self.language == 1:
                     text = 'execution succeed!'
                 if self.language == 2:
@@ -1135,12 +1128,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self.language == 3:
                     text = '执行成功!'
                 QMessageBox.information(self,'Done',text,QMessageBox.Ok,QMessageBox.Ok)
+            except:
+                if self.language == 1:
+                    text = 'Not a valid command or access denied'
+                if self.language == 2:
+                    text = '不是有效命令或存取被拒'
+                if self.language == 3:
+                    text = '不是有效命令或存取被拒'
+                QMessageBox.critical(self,'error', '\"' + dos + '\"' + text,QMessageBox.Ok,QMessageBox.Ok)
     
     def check(self):
-        filepath, filetype= QFileDialog.getOpenFileName(self,"程式分析","./",'EXE Files *.exe;;COM Files *.com;;SCR Files *.scr')     
+        filepath, filetype= QFileDialog.getOpenFileName(self,"文件分析","./",'EXE Files *.exe;;COM Files *.com;;SCR Files *.scr')     
         if not filepath:
             pass
-        else:
+        elif filepath != '':
             filename = filepath
             a = 0
             while True:
@@ -1191,15 +1192,36 @@ class MainWindow(QtWidgets.QMainWindow):
         # }
         # ''')
 
-        self.ui.cmdbut.setStyleSheet('''
-        QPashButton
+
+        self.ui.processlist.setStyleSheet('''
+        QWidget::item
         {
-            background:orange;
-            color:white;
+        background-color: #393d49;
+        color: #00BFFF;
+        border: transparent;
+        border-bottom: 1px solid #dbdbdb;
+        padding: 5px;
         }
 
+        QWidget::item:hover
+        {
+        background-color: #5F5F5F;
+        padding: 6px;
+        }
+
+        QWidget::item:selected
+        {
+        border-left: 5px solid #777777;
+        }
+
+        QListView
+        {
+        outline: none;
+        }
         ''')
 
+        self.ui.processlist.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        
         self.setStyleSheet('''
         qdarkstyle.load_stylesheet_pyqt5()
         ''')
