@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets,QtCore
 from PyQt5.QtWidgets import QFileDialog,QMessageBox,QMenu,QAction,QSystemTrayIcon,QApplication
 from systeminfo import Ui_info
 from PyQt5.QtGui import QIcon
-from os import path,remove
+from os import path
 from library import fun_list
 from PyQt5.QtCore import QStringListModel,QTimer,Qt
 from Main_UI import Ui_MainWindow
@@ -107,9 +107,12 @@ class MainWindow(QtWidgets.QMainWindow):
         config.optionxform = str
         config.read('stg.ini')
         try:
-            config.set('app', self.windowlistname, True)
-            config.write(open('stg.ini', 'w'))
-            self.windowlistname = ''
+            if self.windowlistname == '':
+                pass
+            else:
+                config.set('app', self.windowlistname, True)
+                config.write(open('stg.ini', 'w'))
+                self.windowlistname = ''
         except:
             self.windowinfo = self.ui.windowkillname.text()
             print(self.windowinfo)
@@ -1237,7 +1240,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget.show()
 
     def about(self):
-        QMessageBox.about(self,'about','made by mtkiao129(litesans)')
+        QMessageBox.information(self,'about','made by mtkiao129(litesans)')
 
     def Rundos(self):
         dos = self.ui.Dos.text()
