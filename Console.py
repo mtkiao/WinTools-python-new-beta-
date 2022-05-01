@@ -1,22 +1,16 @@
 #導入模塊
-import getpass,subprocess,configparser,pefile,platform,win32gui,UAC_UI,qdarkstyle,win32process,psutil,base64
+import getpass,subprocess,configparser,pefile,platform,win32gui,UAC_UI,win32process,psutil,base64,PyQt5
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from PyQt5 import QtWidgets,QtCore
-from PyQt5.QtWidgets import QFileDialog,QMessageBox,QMenu,QAction,QSystemTrayIcon,QApplication
+from Main_UI import Ui_MainWindow
 from systeminfo import Ui_info
-from PyQt5.QtGui import QIcon
+from Setting import Ui_Setting_main
 from os import path
 from library import fun_list
-from PyQt5.QtCore import QStringListModel,QTimer,Qt
-from Main_UI import Ui_MainWindow
 from img import explode
 from ctypes import windll
-
-# 判斷是否有管理員權限
-def is_admin():
-    try:
-        return windll.shell32.IsUserAnAdmin()
-    except:
-        return False
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -25,60 +19,62 @@ class MainWindow(QtWidgets.QMainWindow):
         self.UAC = ''
         self.ui.setupUi(self)
         self.setFixedSize(self.width(), self.height())
-        # self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
         self.setup_control()
 
     def setup_control(self):
         # TODO
-        self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools),"工具")
-        self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.process),"進程")
-        self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System),"系統")
-        self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe),"系統程式")
-        self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill),"窗口攔截")
-        self.ui.Close.triggered.connect(self.close)
-        self.ui.English.triggered.connect(self.english)
-        self.ui.Chinese_T.triggered.connect(self.chinese_t)
-        self.ui.Chinese_S.triggered.connect(self.chinese_s)
-        self.ui.Taskbut.clicked.connect(self.Taskmgr)
-        self.ui.fixlimitbut.clicked.connect(self.fixlimit)
-        self.ui.fiximgbut.clicked.connect(self.fiximg)
-        self.ui.regebut.clicked.connect(self.regedit)
-        self.ui.cmdbut.clicked.connect(self.cmd)
-        self.ui.Powershellbut.clicked.connect(self.Powershell)
-        self.ui.resetexplorerbut.clicked.connect(self.resetexplorer)
-        self.ui.cleanuserpwbut.clicked.connect(self.cleanUserPassword)
-        self.ui.fixiconbut.clicked.connect(self.fixicon)
-        self.ui.fixexeimgbut.clicked.connect(self.fixexeimg)
-        self.ui.controlbut.clicked.connect(self.control)
-        self.ui.MMCbut.clicked.connect(self.MMC)
-        self.ui.Gpeditbut.clicked.connect(self.Gpedit)
+        self.ui.Taskmgr_Button.clicked.connect(self.Taskmgr)
+        self.ui.Fix_limit_Button.clicked.connect(self.fixlimit)
+        self.ui.Fix_file_open_way_Button.clicked.connect(self.fiximg)
+        self.ui.Regedit_Button.clicked.connect(self.regedit)
+        self.ui.Cmd_Button.clicked.connect(self.cmd)
+        self.ui.Powershell_Button.clicked.connect(self.Powershell)
+        self.ui.Reopen_explorer_Button.clicked.connect(self.resetexplorer)
+        self.ui.Clear_user_password_Button.clicked.connect(self.cleanUserPassword)
+        self.ui.Fix_file_icon_Button.clicked.connect(self.fixicon)
+        self.ui.Fix_IEFO_Button.clicked.connect(self.fixexeimg)
+        self.ui.Control_Button.clicked.connect(self.control)
+        self.ui.MMC_Button.clicked.connect(self.MMC)
+        self.ui.Gpedit_Button.clicked.connect(self.Gpedit)
         self.ui.Shutdownbut.clicked.connect(self.Shutdown)
         self.ui.resetbut.clicked.connect(self.reset)
         self.ui.RunDos.clicked.connect(self.Rundos)
         self.ui.execheck.clicked.connect(self.check)
         self.ui.systeminfobut.clicked.connect(self.systeminfogrt)
         self.ui.about_us.triggered.connect(self.about)
-        self.ui.processlist.clicked.connect(self.processhwnd)
-        self.ui.processlist.clicked.connect(self.processuser)
+        self.ui.Process_list.clicked.connect(self.processhwnd)
+        self.ui.Process_list.clicked.connect(self.processuser)
         self.ui.windowkillbut.clicked.connect(self.window_blocking)
-        self.ui.windowlistupdate.clicked.connect(self.windownowupdate)
         self.ui.windowlistview.clicked.connect(self.windowview)
-        self.ui.windowup.triggered.connect(self.windowupview)
+        self.ui.Process_manage_Button.clicked.connect(self.changeProcess)
+        self.ui.Utilities_Button.clicked.connect(self.changeUtilities)
+        self.ui.System_Button.clicked.connect(self.changeSystem)
+        self.ui.SystemApp_Button.clicked.connect(self.changeSystemApp)
+        self.ui.WindowBlocking_Button.clicked.connect(self.changeWindowBlocking)
+        self.ui.File_analyze_Button.clicked.connect(self.changeFile_analyze)
+        self.ui.Close_Button.clicked.connect(self.close)
+        self.ui.minimize_Button.clicked.connect(self.showMinimized)
+        self.ui.Menu_Button.clicked.connect(self.showMenu)
         self.ui.stoping.toggled.connect(self.setRunning)
         self.ui.Running.toggled.connect(self.setRunning)
-        self.ui.processlist.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.ui.processlist.customContextMenuRequested.connect(self.generateMenu)
+        self.ui.Process_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.Process_list.customContextMenuRequested.connect(self.generateMenu)
         self.ui.windowkillview.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.windowkillview.customContextMenuRequested.connect(self.delexekill)
         #dialog
         self.ui.setUAC.clicked.connect(self.uac)
         #timer
-        self.beautificationA=QTimer()
-        self.beautificationA.timeout.connect(self.beautification)
-        self.beautificationA.start(1000)
+        self.slm=QStringListModel()
+        self.quantity = 0
+        self.listprocess()
+        self.quantity = len(self.qList_exe)
+        self.ui.Process_total_View.setText(str(self.quantity))
+
         self.timer=QTimer()
         self.timer.timeout.connect(self.listprocess)
-        self.timer.start(1000)
+        self.timer.start(200)
         self.applist=QTimer()
         self.applist.timeout.connect(self.windowlist)
         self.applist.start(1000)
@@ -86,21 +82,86 @@ class MainWindow(QtWidgets.QMainWindow):
         self.exekill.timeout.connect(self.killwindow)
         #other
         self.language = 2
+        self.beautification()
         self.ui.stoping.setChecked(True)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
         self.hwnd_title2 = dict() 
-        # byte_data = base64.b64decode(explode)
-        # image_data = BytesIO(byte_data)
-        # image = Image.open(image_data)
-        def get_pic(pic_code, pic_name):
-            image = open(pic_name, 'wb')
-            image.write(base64.b64decode(pic_code))
-            image.close()
-        get_pic(explode, r'C:\Windows\Temp\exe.png')
-        self.sysIcon = QIcon(r'C:\Windows\Temp\exe.png')
-        self.createTrayIcon()
-        self.setWindowIcon(self.sysIcon)
-        self.trayIcon.show()
+        self.ui.Menu_Button.setAutoRaise(True)
+        self.ui.Utilities.hide()
+        self.ui.System.hide()
+        self.ui.SystemApp.hide()
+        self.ui.WindowBlocking.hide()
+        self.ui.File_analyze.hide()
+
+    def setting_update(self):
+        if not path.isfile(r'./stg.ini'):
+            with open('stg.ini',mode='w',encoding='utf-8') as file:
+                file.write('[app]')
+                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
+        self.config = configparser.RawConfigParser()
+        self.config.optionxform = str
+        self.config.read('stg.ini')
+        self.Main_top = self.config.get('Setting','Main_top')
+        self.Minimize = self.config.get('Setting','Minimize')
+        if self.Main_top:
+            self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+            self.showNormal()
+        else:
+            self.setWindowFlags(QtCore.Qt.WindowShadeButtonHint)
+            self.showNormal()
+
+    def get_pic(self,pic_code, pic_name):
+        image = open(pic_name, 'wb')
+        image.write(base64.b64decode(pic_code))
+        image.close()
+
+    def changeProcess(self):
+        self.ui.Utilities.hide()
+        self.ui.System.hide()
+        self.ui.SystemApp.hide()
+        self.ui.WindowBlocking.hide()
+        self.ui.File_analyze.hide()
+        self.ui.Process.show()
+
+    def changeUtilities(self):
+        self.ui.Process.hide()
+        self.ui.System.hide()
+        self.ui.SystemApp.hide()
+        self.ui.File_analyze.hide()
+        self.ui.WindowBlocking.hide()
+        self.ui.Utilities.show()
+
+    def changeSystem(self):
+        self.ui.Process.hide()
+        self.ui.Utilities.hide()
+        self.ui.SystemApp.hide()
+        self.ui.File_analyze.hide()
+        self.ui.WindowBlocking.hide()
+        self.ui.System.show()
+
+    def changeSystemApp(self):
+        self.ui.Process.hide()
+        self.ui.Utilities.hide()
+        self.ui.WindowBlocking.hide()
+        self.ui.System.hide()
+        self.ui.File_analyze.hide()
+        self.ui.SystemApp.show()
+
+    def changeWindowBlocking(self):
+        self.ui.Process.hide()
+        self.ui.Utilities.hide()
+        self.ui.System.hide()
+        self.ui.SystemApp.hide()
+        self.ui.File_analyze.hide()
+        self.ui.WindowBlocking.show()
+
+    def changeFile_analyze(self):
+        self.ui.Process.hide()
+        self.ui.Utilities.hide()
+        self.ui.System.hide()
+        self.ui.SystemApp.hide()
+        self.ui.WindowBlocking.hide()
+        self.ui.File_analyze.show()
 
     def window_blocking(self):
         config = configparser.RawConfigParser()
@@ -132,6 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if not path.isfile(r'./stg.ini'):
             with open('stg.ini',mode='w',encoding='utf-8') as file:
                 file.write('[app]')
+                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
         self.configlist=QStringListModel()
         config = configparser.RawConfigParser()
         config.optionxform = str
@@ -143,6 +205,9 @@ class MainWindow(QtWidgets.QMainWindow):
             section = config.options('app')
         except:
             config.add_section('app')
+            config.add_section('Setting')
+            config.set('Setting', 'Minimize', True)
+            config.set('Setting', 'Main_top', False)
             config.write(open('stg.ini', 'w'))
             section = config.options('app')
         self.configlist.setStringList(section)
@@ -156,7 +221,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hwnd_title2 = dict() 
         win32gui.EnumWindows(self.windowrunning,0)
         for h,t in self.hwnd_title2.items():
-            if t != '' and t != 'Defender' and t != 'Program Manager' and t != '設定' and t != '小算盤' and t != '電影與電視' and t != '電池計量表'  and t != 'Network Flyout' and t != '電池計量表':
+            if t != '' and t != 'Defender' and t != 'Program Manager' and t != '設定' and t != '小算盤' and t != '電影與電視' and t != '電池計量表'  and t != 'Network Flyout':
                 self.windowlistview.append(t)
                 self.windowlisthwnd.append(h)
                 th,hwndpid = win32process.GetWindowThreadProcessId(h)
@@ -236,7 +301,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def setRunning(self):
         if self.ui.Running.isChecked():
-            self.exekill.start(500)
+            self.exekill.start(100)
         elif self.ui.stoping.isChecked():
             self.exekill.stop()
 
@@ -244,41 +309,44 @@ class MainWindow(QtWidgets.QMainWindow):
         win32process.CreateProcess(exe,"", None, None, 0,win32process.CREATE_NO_WINDOW, None, None,win32process.STARTUPINFO())
 
     def listprocess(self):
-        self.slm=QStringListModel()
-        self.qList = []
-        self.qList_pid = []
-        self.qList_exe = []
-        self.qList_name = []
-        self.qList_user = []
-        for p in psutil.process_iter():
-            try:
-                self.qList.append(p.name() +"   "+ str(p.pid) +"        "+ p.exe())
-                self.qList_pid.append(p.pid)
-                self.qList_exe.append(p.exe())
-                self.qList_name.append(p.name())
-                self.qList_user.append(p.username())
-                # try:
-                #     large, small = win32gui.ExtractIconEx(p.exe(),0)
-                #     win32gui.DestroyIcon(small[0])
-                #     hdc = win32ui.CreateDCFromHandle(win32gui.GetDC(0) )
-                #     hbmp = win32ui.CreateBitmap()
-                #     hbmp.CreateCompatibleBitmap( hdc, 32, 32 )
-                #     hdc = hdc.CreateCompatibleDC()
-                #     hdc.SelectObject( hbmp )
-                #     hdc.DrawIcon( (0,0), large[0] )
-                #     hbmp.SaveBitmapFile( hdc, "save.bmp" )
-                # except:
-                #     pass
-            except:
-                self.qList.append(p.name() +"   "+ str(p.pid))
-                self.qList_pid.append(p.pid)
-                self.qList_exe.append('None')
-                self.qList_name.append(p.name())
-                self.qList_user.append(p.username())
-        self.slm.setStringList(self.qList)
-        self.ui.processlist.setModel(self.slm)
-        # #獲取數量
-        # count = self.slm.rowCount()
+        try:
+            self.qList = []
+            self.qList_pid = []
+            self.qList_exe = []
+            self.qList_name = []
+            self.qList_user = []
+            for p in psutil.process_iter():
+                try:
+                    self.qList.append(p.name() +"   "+ str(p.pid) +"        "+ p.exe())
+                    self.qList_pid.append(p.pid)
+                    self.qList_exe.append(p.exe())
+                    self.qList_name.append(p.name())
+                    self.qList_user.append(p.username())
+                    # try:
+                    #     large, small = win32gui.ExtractIconEx(p.exe(),0)
+                    #     win32gui.DestroyIcon(small[0])
+                    #     hdc = win32ui.CreateDCFromHandle(win32gui.GetDC(0) )
+                    #     hbmp = win32ui.CreateBitmap()
+                    #     hbmp.CreateCompatibleBitmap( hdc, 32, 32 )
+                    #     hdc = hdc.CreateCompatibleDC()
+                    #     hdc.SelectObject( hbmp )
+                    #     hdc.DrawIcon( (0,0), large[0] )
+                    #     hbmp.SaveBitmapFile( hdc, "save.bmp" )
+                    # except:
+                    #     pass
+                except:
+                    self.qList.append(p.name() +"   "+ str(p.pid))
+                    self.qList_pid.append(p.pid)
+                    self.qList_exe.append('None')
+                    self.qList_name.append(p.name())
+                    self.qList_user.append(p.username())
+            if len(self.qList_exe) != self.quantity:
+                self.quantity = len(self.qList_exe)
+                self.ui.Process_total_View.setText(str(self.quantity))
+                self.slm.setStringList(self.qList)
+                self.ui.Process_list.setModel(self.slm)
+        except:
+            pass
 
     def fixlimit(self):
         if self.language == 1:
@@ -946,8 +1014,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def generateMenu(self,pos):  
         try:
-            self.ui.hwndview.setText('')
-            self.item = self.ui.processlist.selectedIndexes()
+            self.ui.Hwnd_View.setText('')
+            self.item = self.ui.Process_list.selectedIndexes()
             for i in self.item:
                 item = i.row()
                 self.pid = self.qList_pid[item]
@@ -958,7 +1026,7 @@ class MainWindow(QtWidgets.QMainWindow):
             for h,title in self.hwnd_title.items():
                 th,hwndpid = win32process.GetWindowThreadProcessId(h)
                 if hwndpid == self.pid:       
-                    self.ui.hwndview.setText(str(h))
+                    self.ui.Hwnd_View.setText(str(h))
                     hwnd = h
             self.processuser()
             self.popMenu = QMenu()
@@ -978,7 +1046,7 @@ class MainWindow(QtWidgets.QMainWindow):
             exefile = QAction(text,self)
             self.popMenu.addAction(self.killp)
             self.popMenu.addAction(exefile)
-            self.exe = self.popMenu.exec_(self.ui.processlist.mapToGlobal(pos))
+            self.exe = self.popMenu.exec_(self.ui.Process_list.mapToGlobal(pos))
             error = 0
             if self.exe == self.killp:
                 try:
@@ -1056,8 +1124,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def processhwnd(self):
         try:
-            self.ui.hwndview.setText('')
-            self.item = self.ui.processlist.selectedIndexes()
+            self.ui.Hwnd_View.setText('')
+            self.item = self.ui.Process_list.selectedIndexes()
             for i in self.item:
                 item = i.row()
                 pid = self.qList_pid[item]
@@ -1066,18 +1134,18 @@ class MainWindow(QtWidgets.QMainWindow):
             for hwnd,title in self.hwnd_title.items():
                 th,hwndpid = win32process.GetWindowThreadProcessId(hwnd)
                 if hwndpid == pid:        
-                    self.ui.hwndview.setText(str(hwnd))
+                    self.ui.Hwnd_View.setText(str(hwnd))
         except:
             pass
 
     def processuser(self):
         try:
-            self.ui.exeuserview.setText('')
-            item = self.ui.processlist.selectedIndexes()
+            self.ui.UserName_View.setText('')
+            item = self.ui.Process_list.selectedIndexes()
             for i in item:
                 item = i.row()
                 username = self.qList_user[item]
-            self.ui.exeuserview.setText(username)
+            self.ui.UserName_View.setText(username)
         except:
             pass
 
@@ -1318,6 +1386,35 @@ class MainWindow(QtWidgets.QMainWindow):
             self.execheck.setStringList(self.execheckdll + self.execheckfun)
             self.ui.execheckview.setModel(self.execheck)
 
+    def showMenu(self):
+        self.StMenu = QMenu()
+        if self.language == 1:
+            text = 'Settings'
+        if self.language == 2:
+            text = '設定'
+        if self.language == 3:
+            text = '设置'
+        Main_settings = QAction(text,self)
+        if self.language == 1:
+            text = 'About'
+        if self.language == 2:
+            text = '關於'
+        if self.language == 3:
+            text = '关于'
+        Main_about = QAction(text,self)
+        self.StMenu.addAction(Main_settings)
+        self.StMenu.addAction(Main_about)
+        pos = PyQt5.QtCore.QPoint(0, 30)
+        Qusetion = self.StMenu.exec_(self.ui.Menu_Button.mapToGlobal(pos))
+        if Qusetion == Main_about:
+            self.about()
+        if Qusetion == Main_settings:
+            self.setting = QtWidgets.QMainWindow()
+            self.Setting_UI = Ui_Setting_main()
+            self.Setting_UI.setupUi(self.setting)
+            self.setting.show()
+
+
     def createTrayIcon(self):
         if self.language == 1:
             text = 'Open the main screen(&R)'
@@ -1347,43 +1444,32 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.trayIcon.isVisible():
             self.hide()
             event.ignore()
-            if self.language == 1:
-                text = 'The software has been minimized to the tray'
-            if self.language == 2:
-                text = '程式已最小化到托盤'
-            if self.language == 3:
-                text = '软件已最小化到托盘'
-            self.trayIcon.showMessage('Wintools',text,icon=1)
 
     def showUI(self,reason):
         if reason == 3:
             self.showNormal()
 
-    def windowupview(self,value):
-        if value:
-            self.setWindowFlags(Qt.WindowStaysOnTopHint)
-            self.showNormal()
-        else:
-            self.setWindowFlags(Qt.WindowShadeButtonHint)
-            self.showNormal()
+    def mousePressEvent(self, event):
+        if event.button()==Qt.LeftButton:
+            self.m_flag=True
+            self.m_Position=event.globalPos()-self.pos() #獲取鼠標相對窗口的位置
+            event.accept()
+        
+    def mouseMoveEvent(self, QMouseEvent):
+        try:
+            if Qt.LeftButton and self.m_flag: 
+                self.move(QMouseEvent.globalPos()-self.m_Position)#更改窗口位置
+                QMouseEvent.accept()
+        except:
+            pass
+        
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.m_flag=False
+        self.setCursor(QCursor(Qt.ArrowCursor))
+
 
     def beautification(self):
-        # self.ui.centralwidget.setStyleSheet('''
-        # QWidget#centralwidget{
-        #     color:#232C51;
-        #     border-top:1px solid darkGray;
-        #     border-bottom:1px solid darkGray;
-        #     border-right:1px solid darkGray;
-        #     border-top-right-radius:10px;
-        #     border-bottom-right-radius:10px;
-        #     border-left:1px solid darkGray;
-        #     border-top-left-radius:10px;
-        #     border-bottom-left-radius:10px;
-        # }
-        # ''')
-
-
-        self.ui.processlist.setStyleSheet('''
+        self.ui.Process_list.setStyleSheet('''
         QWidget::item
         {
         background-color: #393d49;
@@ -1410,20 +1496,48 @@ class MainWindow(QtWidgets.QMainWindow):
         }
         ''')
 
-        self.ui.processlist.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        
-        self.setStyleSheet('''
-        qdarkstyle.load_stylesheet_pyqt5()
-        ''')
+        self.get_pic(explode, r'C:\Windows\Temp\exe.png')
+        self.sysIcon = QIcon(r'C:\Windows\Temp\exe.png')
+        self.createTrayIcon()
+        self.setWindowIcon(self.sysIcon)
+        self.config = configparser.RawConfigParser()
+        self.config.optionxform = str
+        self.config.read('stg.ini')
+        self.Minimize = self.config.get('Setting','Minimize')
+        if self.Minimize:
+            self.trayIcon.show()
 
-if is_admin:
-    if __name__ == '__main__':
-        import sys
-        app = QtWidgets.QApplication(sys.argv)
-        app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-        app.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5',palette=qdarkstyle.LightPalette))
-        window = MainWindow()
-        window.show()
-        sys.exit(app.exec())
-else:
-    windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__)
+    def paintEvent(self, event):
+        path = QPainterPath()
+        path.setFillRule(Qt.WindingFill)
+        pat = QPainter(self)
+        pat.setRenderHint(pat.Antialiasing)
+        pat.fillPath(path, QBrush(Qt.white))
+        color = QColor(192, 192, 192, 50)
+        for i in range(10):
+            i_path = QPainterPath()
+            i_path.setFillRule(Qt.WindingFill)
+            ref = QRectF(10-i, 10-i, self.width()-(10-i)*2, self.height()-(10-i)*2)
+            i_path.addRect(ref)
+            # i_path.addRoundedRect(ref, event.size().width(), event.size().height())
+            color.setAlpha(150 - i**0.5*50)
+            pat.setPen(color)
+            pat.drawPath(i_path)
+        # 圓角
+        pat2 = QPainter(self)
+        pat2.setRenderHint(pat2.Antialiasing) # 抗鋸齒
+        pat2.setBrush(Qt.white)
+        pat2.setPen(Qt.transparent)
+        rect = self.rect()
+        rect.setLeft(10)
+        rect.setTop(10)
+        rect.setWidth(rect.width()-10)
+        rect.setHeight(rect.height()-10)
+        pat2.drawRoundedRect(rect, 4, 4)
+
+if __name__ == '__main__':
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
