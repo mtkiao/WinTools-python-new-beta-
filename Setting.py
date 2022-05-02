@@ -30,6 +30,7 @@ class Ui_Setting_main(object):
         self.Bar.setContentsMargins(30, 0, 30, 0)
         self.Bar.setObjectName("Bar")
         self.pushButton_2 = QtWidgets.QPushButton(self.gridLayoutWidget)
+        self.pushButton_2.setEnabled(False)
         self.pushButton_2.setObjectName("pushButton_2")
         self.Bar.addWidget(self.pushButton_2, 1, 1, 1, 1)
         self.Normal_Setting_Button = QtWidgets.QPushButton(self.gridLayoutWidget)

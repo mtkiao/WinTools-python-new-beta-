@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5 import QtWidgets,QtCore
 from Main_UI import Ui_MainWindow
 from systeminfo import Ui_info
-from Setting import Ui_Setting_main
+import Setting_Console
 from os import path
 from library import fun_list
 from img import explode
@@ -80,13 +80,34 @@ class MainWindow(QtWidgets.QMainWindow):
         self.applist.start(1000)
         self.exekill=QTimer()
         self.exekill.timeout.connect(self.killwindow)
+        self.Setting=QTimer()
+        self.Setting.timeout.connect(self.setting_update)
+        self.Setting.start(1000)
         #other
         self.language = 2
-        self.beautification()
         self.ui.stoping.setChecked(True)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
         self.hwnd_title2 = dict() 
         self.ui.Menu_Button.setAutoRaise(True)
+        self.beautification()
+        self.config = configparser.RawConfigParser()
+        self.config.optionxform = str
+        self.config.read('stg.ini')
+        self.Main_top = self.config.get('Setting','Main_top')
+        self.Minimize = self.config.get('Setting','Minimize')
+        if self.Main_top == 'True':
+            self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
+            self.setFixedSize(self.width(), self.height())
+            self.setAttribute(Qt.WA_TranslucentBackground)
+            self.showNormal()
+        elif self.Main_top == 'False':
+            self.setWindowFlags(QtCore.Qt.Window | Qt.FramelessWindowHint)
+            self.setFixedSize(self.width(), self.height())
+            self.setAttribute(Qt.WA_TranslucentBackground)
+            self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+            self.showNormal()   
+        if self.Minimize == 'True':
+            self.trayIcon.show()
         self.ui.Utilities.hide()
         self.ui.System.hide()
         self.ui.SystemApp.hide()
@@ -101,14 +122,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.config = configparser.RawConfigParser()
         self.config.optionxform = str
         self.config.read('stg.ini')
-        self.Main_top = self.config.get('Setting','Main_top')
-        self.Minimize = self.config.get('Setting','Minimize')
-        if self.Main_top:
-            self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-            self.showNormal()
-        else:
-            self.setWindowFlags(QtCore.Qt.WindowShadeButtonHint)
-            self.showNormal()
+        self.Main_top2 = self.config.get('Setting','Main_top')
+        self.Minimize2 = self.config.get('Setting','Minimize')
+        if self.Main_top2 != self.Main_top:
+            self.Main_top = self.Main_top2
+            if self.Main_top == 'True':
+                self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
+                self.setFixedSize(self.width(), self.height())
+                self.setAttribute(Qt.WA_TranslucentBackground)
+                self.showNormal()
+            elif self.Main_top == 'False':
+                self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
+                self.setFixedSize(self.width(), self.height())
+                self.setAttribute(Qt.WA_TranslucentBackground)
+                self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+                self.showNormal()
+        if self.Minimize2 != self.Minimize:
+            self.Minimize = self.Minimize2
+            if self.Minimize == 'True':
+                self.trayIcon.show()
+            else:
+                QMessageBox.information(self,'Wanring','重起生效',QMessageBox.Ok)
 
     def get_pic(self,pic_code, pic_name):
         image = open(pic_name, 'wb')
@@ -1409,10 +1443,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if Qusetion == Main_about:
             self.about()
         if Qusetion == Main_settings:
-            self.setting = QtWidgets.QMainWindow()
-            self.Setting_UI = Ui_Setting_main()
-            self.Setting_UI.setupUi(self.setting)
-            self.setting.show()
+            self.Setting_window = Setting_Console.setting_controller()
+            self.Setting_window.show()
 
 
     def createTrayIcon(self):
@@ -1500,12 +1532,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sysIcon = QIcon(r'C:\Windows\Temp\exe.png')
         self.createTrayIcon()
         self.setWindowIcon(self.sysIcon)
-        self.config = configparser.RawConfigParser()
-        self.config.optionxform = str
-        self.config.read('stg.ini')
-        self.Minimize = self.config.get('Setting','Minimize')
-        if self.Minimize:
-            self.trayIcon.show()
 
     def paintEvent(self, event):
         path = QPainterPath()
