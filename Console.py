@@ -93,8 +93,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.config = configparser.RawConfigParser()
         self.config.optionxform = str
         self.config.read('stg.ini')
-        self.Main_top = self.config.get('Setting','Main_top')
-        self.Minimize = self.config.get('Setting','Minimize')
+        try:
+            self.Main_top = self.config.get('Setting','Main_top')
+            self.Minimize = self.config.get('Setting','Minimize')
+        except:
+            with open('stg.ini',mode='w',encoding='utf-8') as file:
+                file.write('[app]')
+                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
         if self.Main_top == 'True':
             self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
             self.setFixedSize(self.width(), self.height())
