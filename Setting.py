@@ -95,7 +95,7 @@ class Ui_Setting_main(object):
         self.pushButton_2.setText(_translate("Setting_main", "PushButton"))
         self.Normal_Setting_Button.setText(_translate("Setting_main", "一般設定"))
         self.Common_Text.setText(_translate("Setting_main", "常用選項"))
-        self.Language_Text.setText(_translate("Setting_main", "常用選項"))
+        self.Language_Text.setText(_translate("Setting_main", "語言選項"))
         self.English_Radio.setText(_translate("Setting_main", "English"))
         self.Traditional_Chinese_Radio.setText(_translate("Setting_main", "繁體中文"))
         self.Simplified_Chinese_Radio.setText(_translate("Setting_main", "简体中文"))

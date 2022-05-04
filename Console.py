@@ -11,7 +11,6 @@ from os import path
 from library import fun_list
 from img import explode
 from ctypes import windll
-
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -22,7 +21,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
         self.setup_control()
-
     def setup_control(self):
         # TODO
         self.ui.Taskmgr_Button.clicked.connect(self.Taskmgr)
@@ -84,6 +82,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Setting.timeout.connect(self.setting_update)
         self.Setting.start(1000)
         #other
+        if not path.isfile(r'./stg.ini'):
+            with open('stg.ini',mode='w',encoding='utf-8') as file:
+                file.write('[app]')
+                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
         self.language = 2
         self.ui.stoping.setChecked(True)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
@@ -93,13 +95,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.config = configparser.RawConfigParser()
         self.config.optionxform = str
         self.config.read('stg.ini')
-        try:
-            self.Main_top = self.config.get('Setting','Main_top')
-            self.Minimize = self.config.get('Setting','Minimize')
-        except:
-            with open('stg.ini',mode='w',encoding='utf-8') as file:
-                file.write('[app]')
-                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
+        self.Main_top = self.config.get('Setting','Main_top')
+        self.Minimize = self.config.get('Setting','Minimize')
         if self.Main_top == 'True':
             self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
             self.setFixedSize(self.width(), self.height())
