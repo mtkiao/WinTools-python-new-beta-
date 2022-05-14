@@ -1,16 +1,20 @@
 #導入模塊
-import getpass,subprocess,configparser,pefile,platform,win32gui,UAC_UI,win32process,psutil,base64,PyQt5
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5 import QtWidgets,QtCore
-from Main_UI import Ui_MainWindow
-from systeminfo import Ui_info
-import Setting_Console
-from os import path
-from library import fun_list
-from img import explode
-from ctypes import windll
+try:
+    import getpass,subprocess,configparser,pefile,platform,win32gui,UAC_UI,win32process,psutil,base64,win32api,win32con,win32timezone
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5 import QtWidgets,QtCore
+    from Main_UI import Ui_MainWindow
+    from systeminfo import Ui_info
+    import Setting_Console
+    import os
+    from library import fun_list
+    from img import explode
+    from ctypes import windll
+except Exception as error:
+    print('An error occurred!\nreason:' + str(error))
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -20,6 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setFixedSize(self.width(), self.height())
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+        self.setAcceptDrops(True)
         self.setup_control()
     def setup_control(self):
         # TODO
@@ -38,6 +43,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Gpedit_Button.clicked.connect(self.Gpedit)
         self.ui.Shutdownbut.clicked.connect(self.Shutdown)
         self.ui.resetbut.clicked.connect(self.reset)
+        self.ui.LogOff_Buttun.clicked.connect(self.logoff)
+        self.ui.End_not_system_process_Buttun.clicked.connect(self.end_not_system_process)
+        self.ui.Disable_exe_run_text_Buttun.clicked.connect(self.Disable_exe_run)
+
         self.ui.RunDos.clicked.connect(self.Rundos)
         self.ui.execheck.clicked.connect(self.check)
         self.ui.systeminfobut.clicked.connect(self.systeminfogrt)
@@ -61,6 +70,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Process_list.customContextMenuRequested.connect(self.generateMenu)
         self.ui.windowkillview.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.windowkillview.customContextMenuRequested.connect(self.delexekill)
+        self.ui.Disable_exe_run_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.Disable_exe_run_list.customContextMenuRequested.connect(self.Disable_exe_run_del)
         #dialog
         self.ui.setUAC.clicked.connect(self.uac)
         #timer
@@ -76,13 +87,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.applist=QTimer()
         self.applist.timeout.connect(self.windowlist)
         self.applist.start(1000)
+        self.DisableQTimer=QTimer()
+        self.DisableQTimer.timeout.connect(self.update_Disable_exe_list)
+        self.DisableQTimer.start(1000)
         self.exekill=QTimer()
         self.exekill.timeout.connect(self.killwindow)
         self.Setting=QTimer()
         self.Setting.timeout.connect(self.setting_update)
         self.Setting.start(1000)
         #other
-        if not path.isfile(r'./stg.ini'):
+        if not os.path.isfile(r'./stg.ini'):
             with open('stg.ini',mode='w',encoding='utf-8') as file:
                 file.write('[app]')
                 file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
@@ -92,6 +106,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hwnd_title2 = dict() 
         self.ui.Menu_Button.setAutoRaise(True)
         self.beautification()
+
         self.config = configparser.RawConfigParser()
         self.config.optionxform = str
         self.config.read('stg.ini')
@@ -117,7 +132,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.File_analyze.hide()
 
     def setting_update(self):
-        if not path.isfile(r'./stg.ini'):
+        if not os.path.isfile(r'./stg.ini'):
             with open('stg.ini',mode='w',encoding='utf-8') as file:
                 file.write('[app]')
                 file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
@@ -144,7 +159,7 @@ class MainWindow(QtWidgets.QMainWindow):
             if self.Minimize == 'True':
                 self.trayIcon.show()
             else:
-                QMessageBox.information(self,'Wanring','重起生效',QMessageBox.Ok)
+                QMessageBox.information(None,'Wanring','重啟生效',QMessageBox.Ok)
 
     def get_pic(self,pic_code, pic_name):
         image = open(pic_name, 'wb')
@@ -226,7 +241,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
     def windowlist(self):
-        if not path.isfile(r'./stg.ini'):
+        if not os.path.isfile(r'./stg.ini'):
             with open('stg.ini',mode='w',encoding='utf-8') as file:
                 file.write('[app]')
                 file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
@@ -1319,6 +1334,223 @@ class MainWindow(QtWidgets.QMainWindow):
                     text = '发生错误!'
                 QMessageBox.critical(self,'error',text,QMessageBox.Ok)
     
+    def logoff(self):
+        if self.language == 1:
+            text = 'Are you sure you want to force restart?'
+        if self.language == 2:
+            text = '確定要強制登出嗎?'
+        if self.language == 3:
+            text = '确定要强制注销吗?'
+        question = QMessageBox.warning(self,'LogonOff',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
+            try:
+                si = subprocess.STARTUPINFO()
+                si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.call('Shutdown -l -f',startupinfo=si)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred!'
+                if self.language == 2:
+                    text = '發生錯誤!'
+                if self.language == 3:
+                    text = '发生错误!'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def end_not_system_process(self):
+        if self.language == 1:
+            text = 'Ending all non-system processes may have unintended consequences, continue?'
+        if self.language == 2:
+            text = '結束所有非系統進程可能會帶來意料之外的後果，是否繼續?'
+        if self.language == 3:
+            text = '结束所有非系统进程可能会带来意料之外的后果，是否继续?'
+        question = QMessageBox.warning(self,'End_process',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
+            try:    
+                WinTWS_pid = os.getpid()
+                for p in psutil.process_iter():
+                    try:
+                        if self.check_system_process(p,WinTWS_pid):
+                            # print(p.exe())
+                            p.kill()
+                    except Exception as error:
+                        print(error)
+                        if self.language == 1:
+                            text = 'An error occurred!\nreason:{}'.format(str(error))
+                        if self.language == 2:
+                            text = '發生錯誤!\n原因:{}'.format(str(error))
+                        if self.language == 3:
+                            text = '发生错误!\n原因:{}'.format(str(error))
+                        QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred!'
+                if self.language == 2:
+                    text = '發生錯誤!'
+                if self.language == 3:
+                    text = '发生错误!'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def check_system_process(self,process,pid):
+        if process.name() == 'System':
+            return False
+        if process.name() == 'System Idle Process':
+            return False
+        if process.name() == 'Registry':
+            return False
+        if process.name() == 'MsMpEng.exe':
+            return False
+        if process.name() == 'NisSrv.exe':
+            return False
+        if process.pid == pid:
+            return False
+        if process.exe() == r'C:\Windows\System32\svchost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\smss.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\RuntimeBroker.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\csrss.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\wininit.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\conhost.exe':
+            return False
+        if process.exe() == r'C:\Windows\explorer.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\ctfmon.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\winlogon.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\audiodg.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\services.exe':
+            return False
+        if process.exe() == r'C:\Windows\ImmersiveControlPanel\SystemSettings.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\ntoskrnl.exe':
+            return False
+        if process.exe() == r'C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy\ShellExperienceHost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\fontdrvhost.exe':
+            return False
+        if process.exe() == r'C:\Windows\RtkBtManServ.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\DriverStore\FileRepository\dal.inf_amd64_b5484efd38adbe8d\jhi_service.exe':
+            return False
+        if process.exe() == r'C:\Program Files\Microsoft SQL Server\90\Shared\sqlwriter.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\DriverStore\FileRepository\lms.inf_amd64_fddb643595e0b8d0\LMS.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\DriverStore\FileRepository\mewmiprov.inf_amd64_f866bf1588e6868a\WMIRegistrationService.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\WUDFHost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\oobe\UserOOBEBroker.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\lsass.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\wbem\WmiPrvSE.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\wbem\unsecapp.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\SettingSyncHost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\SgrmBroker.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\SearchProtocolHost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\SearchIndexer.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\SystemSettingsBroker.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\SearchFilterHost.exe':
+            return False
+        if process.exe() == r'C:\Windows\SysWOW64\wbem\WmiPrvSE.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\ApplicationFrameHost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\dasHost.exe':
+            return False
+        if process.exe() == r'MemCompression':
+            return False
+        if process.exe() == r'C:\Windows\System32\dwm.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\sihost.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\taskhostw.exe':
+            return False
+        if process.exe() == r'C:\Windows\System32\smartscreen.exe':
+            return False
+        return True
+        
+    def Disable_exe_run(self):
+        exe_name = self.ui.Disable_exe_run_text_input.text()
+        key = win32api.RegOpenKey(win32con.HKEY_USERS,None,0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+        for item in win32api.RegEnumKeyEx(key):
+            item2 = item[0]
+            if item2[-4:] == '1001':
+                try:
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                except:
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    win32api.RegCreateKey(key,'Explorer')
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                win32api.RegSetValueEx(key, 'DisallowRun', 0, win32con.REG_DWORD, 1)
+                try:
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                except:
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    win32api.RegCreateKey(key,'DisallowRun')
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                win32api.RegSetValueEx(key, exe_name, 0, win32con.REG_SZ, exe_name)
+                self.update_Disable_exe_list()
+        win32api.RegCloseKey(key)
+
+    def update_Disable_exe_list(self):
+        self.Disables = [] 
+        try:
+            key = win32api.RegOpenKey(win32con.HKEY_USERS,None,0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+            for item in win32api.RegEnumKeyEx(key):
+                item2 = item[0]
+                if item2[-4:] == '1001':
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    for i in range(0,win32api.RegQueryInfoKey(key)[1]):
+                        self.Disables.append(win32api.RegEnumValue(key,i)[0])
+                        self.Disable_list=QStringListModel()
+                        self.Disable_list.setStringList(self.Disables)
+                        self.ui.Disable_exe_run_list.setModel(self.Disable_list)
+        except:
+            pass
+
+    def Disable_exe_run_del(self,pos):
+        import win32api,win32con
+        try:
+            self.Disable_item = self.ui.Disable_exe_run_list.selectedIndexes()
+            for i in self.Disable_item:
+                item = i.row()
+                self.Disable_row = self.Disables[item]
+            key = win32api.RegOpenKey(win32con.HKEY_USERS,None,0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+            for item in win32api.RegEnumKeyEx(key):
+                item2 = item[0]
+                if item2[-4:] == '1001':
+                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+            self.Disable_Menu = QMenu()
+            if self.language == 1:
+                text = 'delete'
+            if self.language == 2:
+                text = '刪除'
+            if self.language == 3:
+                text = '删除'
+            self.Delete_Disable = QAction(text,self)
+            self.Disable_Menu.addAction(self.Delete_Disable)
+            self.exe = self.Disable_Menu.exec_(self.ui.Disable_exe_run_list.mapToGlobal(pos))
+            if self.exe == self.Delete_Disable:
+                win32api.RegDeleteValue(key,self.Disable_row)
+                win32api.RegCloseKey(key)
+        except:
+            pass
+        
+
     def systeminfogrt(self):
         self.info = QtWidgets.QMainWindow()
         self.infoui = Ui_info()
@@ -1360,7 +1592,13 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 si = subprocess.STARTUPINFO()
                 si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                subprocess.call(dos,startupinfo=si)
+                p = subprocess.Popen(dos,
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        )
+                out = p.stdout.read()
+                self.ui.Output.setText(str(out))
+                # subprocess.call(dos,startupinfo=si)
                 if self.language == 1:
                     text = 'execution succeed!'
                 if self.language == 2:
@@ -1440,7 +1678,7 @@ class MainWindow(QtWidgets.QMainWindow):
         Main_about = QAction(text,self)
         self.StMenu.addAction(Main_settings)
         self.StMenu.addAction(Main_about)
-        pos = PyQt5.QtCore.QPoint(0, 30)
+        pos = QtCore.QPoint(0, 30)
         Qusetion = self.StMenu.exec_(self.ui.Menu_Button.mapToGlobal(pos))
         if Qusetion == Main_about:
             self.about()
