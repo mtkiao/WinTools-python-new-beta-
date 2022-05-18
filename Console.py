@@ -27,60 +27,87 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setAcceptDrops(True)
         self.setup_control()
     def setup_control(self):
-        # TODO
+        # System_app
+        self.ui.SystemApp_Button.clicked.connect(self.changeSystemApp)
         self.ui.Taskmgr_Button.clicked.connect(self.Taskmgr)
-        self.ui.Fix_limit_Button.clicked.connect(self.fixlimit)
-        self.ui.Fix_file_open_way_Button.clicked.connect(self.fiximg)
         self.ui.Regedit_Button.clicked.connect(self.regedit)
         self.ui.Cmd_Button.clicked.connect(self.cmd)
         self.ui.Powershell_Button.clicked.connect(self.Powershell)
+        self.ui.Control_Button.clicked.connect(self.control)
+        self.ui.MMC_Button.clicked.connect(self.MMC)
+        self.ui.Gpedit_Button.clicked.connect(self.Gpedit)
+
+        self.ui.Calc_Button.clicked.connect(self.Calc)
+        self.ui.Compmgmt_Button.clicked.connect(self.Compmgmt)
+        self.ui.Devmgmt_Button.clicked.connect(self.Devmgmt)
+        self.ui.Dxdiag_Button.clicked.connect(self.Dxdiag)
+        self.ui.Lusrmgr_Button.clicked.connect(self.Lusrmgr)
+        self.ui.Magnify_Button.clicked.connect(self.Magnify)
+        self.ui.Msinfo32_Button.clicked.connect(self.Msinfo32)
+        self.ui.Winver_Button.clicked.connect(self.Winver)
+
+        # Utilities
+        self.ui.Utilities_Button.clicked.connect(self.changeUtilities)
+        self.ui.Fix_limit_Button.clicked.connect(self.fixlimit)
+        self.ui.Fix_file_open_way_Button.clicked.connect(self.fiximg)
         self.ui.Reopen_explorer_Button.clicked.connect(self.resetexplorer)
         self.ui.Clear_user_password_Button.clicked.connect(self.cleanUserPassword)
         self.ui.Fix_file_icon_Button.clicked.connect(self.fixicon)
         self.ui.Fix_IEFO_Button.clicked.connect(self.fixexeimg)
-        self.ui.Control_Button.clicked.connect(self.control)
-        self.ui.MMC_Button.clicked.connect(self.MMC)
-        self.ui.Gpedit_Button.clicked.connect(self.Gpedit)
+        self.ui.recover_Wallpaper_Button.clicked.connect(self.recover_Wallpaper)
+
+        # System
+        self.ui.System_Button.clicked.connect(self.changeSystem)
         self.ui.Shutdownbut.clicked.connect(self.Shutdown)
         self.ui.resetbut.clicked.connect(self.reset)
         self.ui.LogOff_Buttun.clicked.connect(self.logoff)
         self.ui.End_not_system_process_Buttun.clicked.connect(self.end_not_system_process)
         self.ui.Disable_exe_run_text_Buttun.clicked.connect(self.Disable_exe_run)
-
         self.ui.RunDos.clicked.connect(self.Rundos)
-        self.ui.execheck.clicked.connect(self.check)
         self.ui.systeminfobut.clicked.connect(self.systeminfogrt)
+        self.ui.Explorer_setting_show_file_extension_check.clicked.connect(self.Explorer_setting_show_file_extension)
+        self.ui.Explorer_setting_show_hide_file_check.clicked.connect(self.Explorer_setting_show_hide_file)
+        self.ui.Explorer_setting_show_hide_system_file_check.clicked.connect(self.Explorer_setting_show_hide_system_file)
+        self.ui.Disable_exe_run_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.Disable_exe_run_list.customContextMenuRequested.connect(self.Disable_exe_run_del)
+
+        # Window
         self.ui.about_us.triggered.connect(self.about)
-        self.ui.Process_list.clicked.connect(self.processhwnd)
-        self.ui.Process_list.clicked.connect(self.processuser)
-        self.ui.windowkillbut.clicked.connect(self.window_blocking)
-        self.ui.windowlistview.clicked.connect(self.windowview)
-        self.ui.Process_manage_Button.clicked.connect(self.changeProcess)
-        self.ui.Utilities_Button.clicked.connect(self.changeUtilities)
-        self.ui.System_Button.clicked.connect(self.changeSystem)
-        self.ui.SystemApp_Button.clicked.connect(self.changeSystemApp)
-        self.ui.WindowBlocking_Button.clicked.connect(self.changeWindowBlocking)
-        self.ui.File_analyze_Button.clicked.connect(self.changeFile_analyze)
         self.ui.Close_Button.clicked.connect(self.close)
         self.ui.minimize_Button.clicked.connect(self.showMinimized)
         self.ui.Menu_Button.clicked.connect(self.showMenu)
-        self.ui.stoping.toggled.connect(self.setRunning)
-        self.ui.Running.toggled.connect(self.setRunning)
+
+        # Process
+        self.ui.Process_manage_Button.clicked.connect(self.changeProcess)
+        self.ui.Process_list.clicked.connect(self.processhwnd)
+        self.ui.Process_list.clicked.connect(self.processuser)
         self.ui.Process_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.Process_list.customContextMenuRequested.connect(self.generateMenu)
+
+        #WindowBlocking
+        self.ui.WindowBlocking_Button.clicked.connect(self.changeWindowBlocking)
+        self.ui.windowkillbut.clicked.connect(self.window_blocking)
+        self.ui.windowlistview.clicked.connect(self.windowview)
         self.ui.windowkillview.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.windowkillview.customContextMenuRequested.connect(self.delexekill)
-        self.ui.Disable_exe_run_list.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.ui.Disable_exe_run_list.customContextMenuRequested.connect(self.Disable_exe_run_del)
-        #dialog
+        self.ui.stoping.toggled.connect(self.setRunning)
+        self.ui.Running.toggled.connect(self.setRunning)
+
+        # analyze
+        self.ui.File_analyze_Button.clicked.connect(self.changeFile_analyze)
+        self.ui.execheck.clicked.connect(self.check)
+
+        # dialog
         self.ui.setUAC.clicked.connect(self.uac)
-        #timer
+
+        # other
         self.slm=QStringListModel()
         self.quantity = 0
         self.listprocess()
         self.quantity = len(self.qList_exe)
         self.ui.Process_total_View.setText(str(self.quantity))
 
+        # Qtimer
         self.timer=QTimer()
         self.timer.timeout.connect(self.listprocess)
         self.timer.start(200)
@@ -95,41 +122,149 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Setting=QTimer()
         self.Setting.timeout.connect(self.setting_update)
         self.Setting.start(1000)
-        #other
-        if not os.path.isfile(r'./stg.ini'):
+
+        # init
+        try:
+            self.config = configparser.RawConfigParser()
+            self.config.optionxform = str
+            self.config.read('stg.ini')
+            self.Main_top = self.config.get('Setting','Main_top')
+            self.Minimize = self.config.get('Setting','Minimize')
+            self.Language_value = self.config.get('Setting','Language')
+        except:
             with open('stg.ini',mode='w',encoding='utf-8') as file:
-                file.write('[app]')
-                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
-        self.language = 2
+                file.write('[app]\n\n[Setting]\nMinimize = True\nMain_top = False\nLanguage = Traditional_Chinese') 
+            self.config = configparser.RawConfigParser()
+            self.config.optionxform = str
+            self.config.read('stg.ini')
+            self.Main_top = self.config.get('Setting','Main_top')
+            self.Minimize = self.config.get('Setting','Minimize')
+            self.Language_value = self.config.get('Setting','Language')
+        self.Language_init()
+
         self.ui.stoping.setChecked(True)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
         self.hwnd_title2 = dict() 
         self.ui.Menu_Button.setAutoRaise(True)
         self.beautification()
+        self.init_explorer_setting()
 
-        self.config = configparser.RawConfigParser()
-        self.config.optionxform = str
-        self.config.read('stg.ini')
-        self.Main_top = self.config.get('Setting','Main_top')
-        self.Minimize = self.config.get('Setting','Minimize')
-        if self.Main_top == 'True':
-            self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
-            self.setFixedSize(self.width(), self.height())
-            self.setAttribute(Qt.WA_TranslucentBackground)
-            self.showNormal()
-        elif self.Main_top == 'False':
-            self.setWindowFlags(QtCore.Qt.Window | Qt.FramelessWindowHint)
-            self.setFixedSize(self.width(), self.height())
-            self.setAttribute(Qt.WA_TranslucentBackground)
-            self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
-            self.showNormal()   
-        if self.Minimize == 'True':
-            self.trayIcon.show()
+        # ini
+        try:
+            self.config = configparser.RawConfigParser()
+            self.config.optionxform = str
+            self.config.read('stg.ini')
+            self.Main_top = self.config.get('Setting','Main_top')
+            self.Minimize = self.config.get('Setting','Minimize')
+            self.Language_value = self.config.get('Setting','Language')
+            if self.Main_top == 'True':
+                self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Window)
+                self.setFixedSize(self.width(), self.height())
+                self.setAttribute(Qt.WA_TranslucentBackground)
+                self.showNormal()
+            elif self.Main_top == 'False':
+                self.setWindowFlags(QtCore.Qt.Window | Qt.FramelessWindowHint)
+                self.setFixedSize(self.width(), self.height())
+                self.setAttribute(Qt.WA_TranslucentBackground)
+                self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+                self.showNormal()   
+            if self.Minimize == 'True':
+                self.trayIcon.show()
+        except:
+            with open('stg.ini',mode='w',encoding='utf-8') as file:
+                file.write('[app]\n\n[Setting]\nMinimize = True\nMain_top = False\nLanguage = Traditional_Chinese') 
+
         self.ui.Utilities.hide()
         self.ui.System.hide()
         self.ui.SystemApp.hide()
         self.ui.WindowBlocking.hide()
         self.ui.File_analyze.hide()
+
+    def Language_init(self):
+        if self.Language_value == 'Traditional_Chinese':
+            self.language = 3
+            self.chinese_t()
+        elif self.Language_value == 'English':
+            self.language = 1
+            self.english()
+        elif self.Language_value == 'Simplified_Chinese':
+            self.language = 2
+            self.chinese_s()
+
+    def init_explorer_setting(self):
+        try:
+            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+        except:
+            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegCreateKey(key,'Advanced')
+            key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+        for i in range(0,win32api.RegQueryInfoKey(key)[1]):
+            if win32api.RegEnumValue(key,i)[0] == 'HideFileExt':
+                if win32api.RegEnumValue(key,i)[1] == 0:
+                    self.ui.Explorer_setting_show_file_extension_check.setChecked(True)
+            if win32api.RegEnumValue(key,i)[0] == 'Hidden':
+                if win32api.RegEnumValue(key,i)[1] == 1:
+                    self.ui.Explorer_setting_show_hide_file_check.setChecked(True)
+            if win32api.RegEnumValue(key,i)[0] == 'ShowSuperHidden':
+                if win32api.RegEnumValue(key,i)[1] == 1:
+                    self.ui.Explorer_setting_show_hide_system_file_check.setChecked(True)
+
+    def Explorer_setting_show_file_extension(self):
+        import win32api,win32con
+        if self.ui.Explorer_setting_show_file_extension_check.isChecked():
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'Advanced')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'HideFileExt', 0, win32con.REG_DWORD, 0)
+        elif self.ui.Explorer_setting_show_file_extension_check.isCheckable():
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'Advanced')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'HideFileExt', 0, win32con.REG_DWORD, 1)
+
+    def Explorer_setting_show_hide_file(self):
+        import win32api,win32con
+        if self.ui.Explorer_setting_show_hide_file_check.isChecked():
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'Advanced')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'Hidden', 0, win32con.REG_DWORD, 1)
+        elif self.ui.Explorer_setting_show_hide_file_check.isCheckable():
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'Advanced')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'Hidden', 0, win32con.REG_DWORD, 2)
+
+    def Explorer_setting_show_hide_system_file(self):
+        import win32api,win32con
+        if self.ui.Explorer_setting_show_hide_system_file_check.isChecked():
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'Advanced')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'ShowSuperHidden', 0, win32con.REG_DWORD, 1)
+        elif self.ui.Explorer_setting_show_hide_system_file_check.isCheckable():
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            except:
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegCreateKey(key,'Advanced')
+                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced',0,win32con.KEY_ALL_ACCESS)
+            win32api.RegSetValueEx(key, 'ShowSuperHidden', 0, win32con.REG_DWORD, 2)
 
     def setting_update(self):
         if not os.path.isfile(r'./stg.ini'):
@@ -416,43 +551,161 @@ class MainWindow(QtWidgets.QMainWindow):
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'Explorer')
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'NoControlPanel', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoDrives', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFileMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFind', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRealMode', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRecentDocsMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSetFolders', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSetFolderOptions', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoViewOnDrive', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoClose', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRun', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoDesktop', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoLogOff', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFolderOptions', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoViewContextMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'HideClock', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuMorePrograms', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuMyGames', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuMyMusic', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuNetworkPlaces', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuPinnedList', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoActiveDesktop', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoActiveDesktopChanges', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoChangeStartMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'ClearRecentDocsOnExit', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFavoritesMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRecentDocsHistory', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSetTaskbar', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSMHelp', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoTrayContextMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoViewContextMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoWindowUpdate', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoWinKeys', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'StartMenuLogOff', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoLowDiskSpaceChecks', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSimpleNetlDList', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'NoControlPanel')
+                except:
+                    pass
+                    
+                try:
+                    win32api.RegDeleteValue(key, 'NoDrives')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoControlPanel')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoFileMenu')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoFind')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoRealMode')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoRecentDocsMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetFolders')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetFolderOptions')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoViewOnDrive')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoClose')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoRun')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoDesktop')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoLogOff')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoFolderOptions')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoViewContextMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'HideClock')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuMorePrograms')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuMyGames')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuMyMusic')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuNetworkPlaces')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuPinnedList')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoActiveDesktop')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoActiveDesktopChanges')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoChangeStartMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'ClearRecentDocsOnExit')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoFavoritesMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoRecentDocsHistory')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetTaskbar')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSMHelp')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoTrayContextMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoViewContextMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoWindowUpdate')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoWinKeys')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'StartMenuLogOff')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSimpleNetlDList')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoLowDiskSpaceChecks')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'DisableLockWorkstation')
+                except:
+                    pass
                 win32api.RegCloseKey(key)
+
 
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS)
@@ -461,43 +714,161 @@ class MainWindow(QtWidgets.QMainWindow):
                     win32api.RegCreateKey(key,'Explorer')
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS)
                 key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'NoControlPanel', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoDrives', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFileMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFind', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRealMode', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRecentDocsMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSetFolders', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSetFolderOptions', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoViewOnDrive', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoClose', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRun', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoDesktop', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoLogOff', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFolderOptions', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoViewContextMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'HideClock', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuMorePrograms', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuMyGames', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuMyMusic', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuNetworkPlaces', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoStartMenuPinnedList', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoActiveDesktop', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoActiveDesktopChanges', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoChangeStartMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'ClearRecentDocsOnExit', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoFavoritesMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoRecentDocsHistory', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSetTaskbar', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSMHelp', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoTrayContextMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoViewContextMenu', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoWindowUpdate', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoWinKeys', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'StartMenuLogOff', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoLowDiskSpaceChecks', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoSimpleNetlDList', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'NoControlPanel')
+                except:
+                    pass
+                    
+                try:
+                    win32api.RegDeleteValue(key, 'NoDrives')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoControlPanel')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoFileMenu')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoFind')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoRealMode')
+                except:
+                    pass                
+                try:
+                    win32api.RegDeleteValue(key, 'NoRecentDocsMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetFolders')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetFolderOptions')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoViewOnDrive')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoClose')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoRun')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoDesktop')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoLogOff')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoFolderOptions')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoViewContextMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'HideClock')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuMorePrograms')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuMyGames')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuMyMusic')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuNetworkPlaces')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoStartMenuPinnedList')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoActiveDesktop')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoActiveDesktopChanges')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoChangeStartMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'ClearRecentDocsOnExit')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoFavoritesMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoRecentDocsHistory')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetTaskbar')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSMHelp')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoTrayContextMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoViewContextMenu')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoWindowUpdate')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoWinKeys')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'StartMenuLogOff')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSimpleNetlDList')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoLowDiskSpaceChecks')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'DisableLockWorkstation')
+                except:
+                    pass
                 win32api.RegCloseKey(key)
+
 
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',0,win32con.KEY_ALL_ACCESS)
@@ -505,10 +876,24 @@ class MainWindow(QtWidgets.QMainWindow):
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'System')
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'DisableTaskMgr', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'DisableRegistryTools', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'DisableChangePassword', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'DisableTaskMgr')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'DisableRegistryTools')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'DisableChangePassword')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'Wallpaper')
+                except:
+                    pass
                 win32api.RegCloseKey(key)
+
 
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',0,win32con.KEY_ALL_ACCESS)
@@ -516,10 +901,24 @@ class MainWindow(QtWidgets.QMainWindow):
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'System')
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'DisableTaskMgr', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'DisableRegistryTools', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'DisableChangePassword', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'DisableTaskMgr')
+                except:
+                    pass       
+                try:
+                    win32api.RegDeleteValue(key, 'DisableRegistryTools')
+                except:
+                    pass        
+                try:
+                    win32api.RegDeleteValue(key, 'DisableChangePassword')
+                except:
+                    pass           
+                try:
+                    win32api.RegDeleteValue(key, 'Wallpaper')
+                except:
+                    pass
                 win32api.RegCloseKey(key)
+
 
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\ActiveDesktop',0,win32con.KEY_ALL_ACCESS)
@@ -527,9 +926,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'ActiveDesktop')
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\ActiveDesktop',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'NoComponents', 0, win32con.REG_DWORD, 0)
-                win32api.RegSetValueEx(key, 'NoAddingComponents', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'NoComponents')
+                except:
+                    pass          
+                try:
+                    win32api.RegDeleteValue(key, 'NoAddingComponents')
+                except:
+                    pass                  
                 win32api.RegCloseKey(key)
+
 
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
@@ -537,17 +943,25 @@ class MainWindow(QtWidgets.QMainWindow):
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Policies\Microsoft\Windows',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'System')
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'DisableCMD', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'DisableCMD')
+                except:
+                    pass                    
                 win32api.RegCloseKey(key)
         
+
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
                 except:
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Policies\Microsoft\Windows',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'System')
                     key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Policies\Microsoft\Windows\System',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'DisableCMD', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'DisableCMD')
+                except:
+                    pass    
                 win32api.RegCloseKey(key)
+
 
                 try:
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC\{8FC0B734-A0E1-11D1-A7D3-0000F87571E3}',0,win32con.KEY_ALL_ACCESS)
@@ -560,7 +974,10 @@ class MainWindow(QtWidgets.QMainWindow):
                         key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegCreateKey(key,'{8FC0B734-A0E1-11D1-A7D3-0000F87571E3}')
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'Software\Policies\Microsoft\MMC\{8FC0B734-A0E1-11D1-A7D3-0000F87571E3}',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValueEx(key, 'Restrict_Run', 0, win32con.REG_DWORD, 0)
+                try:
+                    win32api.RegDeleteValue(key, 'Restrict_Run')
+                except:
+                    pass
                 win32api.RegCloseKey(key)
 
                 if self.language == 1:
@@ -569,6 +986,43 @@ class MainWindow(QtWidgets.QMainWindow):
                     text = '修復系統限制成功!'
                 if self.language == 3:
                     text = '修复系统限制成功!'
+                QMessageBox.information(self,'Done',text,QMessageBox.Ok,QMessageBox.Ok)
+            except:
+                if self.language == 1:
+                    text = 'An error occurred'
+                if self.language == 2:
+                    text = '發生錯誤'
+                if self.language == 3:
+                    text = '发生错误'
+                QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def recover_Wallpaper(self):
+        if self.language == 1:
+            text = 'Are you sure you want to repair the file open method?'
+        if self.language == 2:
+            text = '確定要修復文件打開方式嗎?'
+        if self.language == 3:
+            text = '确定要修复文件打开方式吗?'
+        question = QMessageBox.warning(self,'Fixexeopen',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+        if question == 16384:
+            try:
+                try:
+                    key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers',0,win32con.KEY_ALL_ACCESS)
+                except:
+                    key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegCreateKey(key,'Wallpapers')
+                    key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'BackgroundHistoryPath0', win32con.REG_SZ, r'c:\windows\web\wallpaper\windows\img0.jpg')
+                win32api.RegSetValue(key, 'BackgroundHistoryPath1', win32con.REG_SZ, r'c:\windows\web\wallpaper\theme1\img1.jpg')
+                win32api.RegSetValue(key, 'BackgroundHistoryPath2', win32con.REG_SZ, r'c:\windows\web\wallpaper\theme1\img13.jpg')
+                win32api.RegSetValue(key, 'BackgroundHistoryPath3', win32con.REG_SZ, r'c:\windows\web\wallpaper\windows\img2.jpg')
+                win32api.RegSetValue(key, 'BackgroundHistoryPath4', win32con.REG_SZ, r'c:\windows\web\wallpaper\windows\img3.jpg')
+                if self.language == 1:
+                    text = 'Fix Wallpapers successfully!'
+                if self.language == 2:
+                    text = '修復桌布成功!'
+                if self.language == 3:
+                    text = '修复壁纸成功!'
                 QMessageBox.information(self,'Done',text,QMessageBox.Ok,QMessageBox.Ok)
             except:
                 if self.language == 1:
@@ -609,9 +1063,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
                 win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
                 win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                win32api.RegSetValue(key, '.ini', win32con.REG_SZ, 'inifile')
+                win32api.RegSetValue(key, 'inifile', win32con.REG_SZ, 'Configuration Settings')
                 win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
                 win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
@@ -638,9 +1093,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 win32api.RegSetValue(key, 'VBSfile', win32con.REG_SZ, 'VBScript Script File')
                 win32api.RegSetValue(key, '.txt', win32con.REG_SZ, 'txtfile')
                 win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                win32api.RegSetValue(key, '.ini', win32con.REG_SZ, 'inifile')
+                win32api.RegSetValue(key, 'inifile', win32con.REG_SZ, 'Configuration Settings')
                 win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
                 win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
@@ -681,7 +1137,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
                 win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
                 win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-                win32api.RegSetValue(key, 'txtfile', win32con.REG_SZ, 'Text Document')
+                win32api.RegSetValue(key, '.ini', win32con.REG_SZ, 'inifile')
+                win32api.RegSetValue(key, 'inifile', win32con.REG_SZ, 'Configuration Settings')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
@@ -707,221 +1164,217 @@ class MainWindow(QtWidgets.QMainWindow):
                 QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
     def english(self):
-        if self.language == 1:
-            text = 'Are you sure you want to switch languages?'
-        if self.language == 2:
-            text = '確定要切換語言嗎?'
-        if self.language == 3:
-            text = '确定要切换语言吗?'
-        qusetion = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
-        if qusetion == 16384:
-            self.language = 1
-            _translate = QtCore.QCoreApplication.translate
-            self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">command</span></p></body></html>"))
-            self.ui.RunDos.setText(_translate("MainWindow", "Run"))
-            self.ui.exeuser.setText(_translate("MainWindow", "exe analyse:"))
-            self.ui.processname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">name</span></p></body></html>"))
-            self.ui.processPID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
-            self.ui.processfile.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe Path</span></p></body></html>"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.process), _translate("MainWindow", "Process"))
-            self.ui.resetexplorerbut.setText(_translate("MainWindow", "Reboot Explorer"))
-            self.ui.cleanuserpwbut.setText(_translate("MainWindow", "purge user password"))
-            self.ui.fixlimitbut.setText(_translate("MainWindow", "relieve System limit"))
-            self.ui.fiximgbut.setText(_translate("MainWindow", "repair file open manner"))
-            self.ui.fixiconbut.setText(_translate("MainWindow", "repair file icon"))
-            self.ui.fixexeimgbut.setText(_translate("MainWindow", "repair IFEO"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools), _translate("MainWindow", "Tools"))
-            self.ui.Taskbut.setText(_translate("MainWindow", "Taskmgr"))
-            self.ui.Powershellbut.setText(_translate("MainWindow", "Powershell"))
-            self.ui.regebut.setText(_translate("MainWindow", "Regedit"))
-            self.ui.cmdbut.setText(_translate("MainWindow", "Cmd"))
-            self.ui.Gpeditbut.setText(_translate("MainWindow", "Gpedit"))
-            self.ui.controlbut.setText(_translate("MainWindow", "Control"))
-            self.ui.MMCbut.setText(_translate("MainWindow", "MMC"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe), _translate("MainWindow", "System exe"))
-            self.ui.Shutdownbut.setText(_translate("MainWindow", "compulsion shutdown"))
-            self.ui.resetbut.setText(_translate("MainWindow", "compulsion reboot"))
-            self.ui.setUAC.setText(_translate("MainWindow", "set UAC"))
-            self.ui.systeminfobut.setText(_translate("MainWindow", "System info"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System), _translate("MainWindow", "System"))
-            self.ui.menu.setTitle(_translate("MainWindow", "function"))
-            self.ui.menu_3.setTitle(_translate("MainWindow", "language"))
-            self.ui.menu_2.setTitle(_translate("MainWindow", "about"))
-            self.ui.Close.setText(_translate("MainWindow", "Close"))
-            self.ui.about_us.setText(_translate("MainWindow", "about"))
-            self.ui.English.setText(_translate("MainWindow", "English"))
-            self.ui.Chinese_T.setText(_translate("MainWindow", "traditional Chinese"))
-            self.ui.Chinese_S.setText(_translate("MainWindow", "Simplified Chinese"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill), _translate("MainWindow", "window blocking"))
-            self.ui.hint.setText(_translate("MainWindow", "Operating status"))
-            self.ui.Running.setText(_translate("MainWindow", "Run"))
-            self.ui.stoping.setText(_translate("MainWindow", "Stop"))
-            self.ui.windowkillbut.setText(_translate("MainWindow", "Ok"))
-            self.ui.windowkilllist.setText(_translate("MainWindow", "Blocking window list"))
-            self.ui.windowhint.setText(_translate("MainWindow", "Please enter the name of the window you want to block"))
-            self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">file name:</span></p></body></html>"))
-            self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">file Path:</span></p></body></html>"))
-            self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">DLLs and functions called by the analyzed file and descriptions</span></p></body></html>"))
-            self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">Dangerous:</span></p></body></html>"))
-            self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
-            self.ui.execheck.setText(_translate("MainWindow", "file analysis"))
-            self.ui.hwnd.setText(_translate("MainWindow", "hwnd:"))
-            self.ui.windowlistupdate.setText(_translate("MainWindow", "update"))
-            self.ui.fixlimitbut.setGeometry(QtCore.QRect(10, 10, 110, 30))
-            self.ui.fiximgbut.setGeometry(QtCore.QRect(130, 10, 140, 30))
-            self.ui.resetexplorerbut.setGeometry(QtCore.QRect(610, 10, 100, 30))
-            self.ui.cleanuserpwbut.setGeometry(QtCore.QRect(480, 10, 120, 30))
-            self.ui.fixiconbut.setGeometry(QtCore.QRect(380, 10, 90, 30))
-            self.ui.fixexeimgbut.setGeometry(QtCore.QRect(280, 10, 90, 30))
-            self.ui.Shutdownbut.setGeometry(QtCore.QRect(10, 10, 130, 30))
-            self.ui.resetbut.setGeometry(QtCore.QRect(150, 10, 120, 30))
-            self.ui.setUAC.setGeometry(QtCore.QRect(280, 10, 80, 30))
+        self.language = 1
+        _translate = QtCore.QCoreApplication.translate
+        self.ui.Process_name.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">name</span></ p></body></html>"))
+        self.ui.Process_PID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></ p></body></html>"))
+        self.ui.Process_path.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\"> exe path</span></p></body></html>"))
+        self.ui.Hwnd.setText(_translate("MainWindow", "<html><head/><body><p>handle:</p></body></html>"))
+        self.ui.UserName.setText(_translate("MainWindow", "<html><head/><body><p>Username:</p></body></html>"))
+        self.ui.Process_total.setText(_translate("MainWindow", "<html><head/><body><p>Total number of processes:</p></body></html>"))
+        self.ui.Fix_limit_Button.setText(_translate("MainWindow", "Release system limit"))
+        self.ui.Fix_file_icon_Button.setText(_translate("MainWindow", "Fixer Icon"))
+        self.ui.Clear_user_password_Button.setText(_translate("MainWindow", "Clear user password"))
+        self.ui.Reopen_explorer_Button.setText(_translate("MainWindow", "Restart Explorer"))
+        self.ui.Fix_IEFO_Button.setText(_translate("MainWindow", "Fix Image Hijacking"))
+        self.ui.Fix_file_open_way_Button.setText(_translate("MainWindow", "Fix open way"))
+        self.ui.recover_Wallpaper_Button.setText(_translate("MainWindow", "Recover default wallpaper"))
+        self.ui.Shutdownbut.setText(_translate("MainWindow", "Force Shutdown"))
+        self.ui.resetbut.setText(_translate("MainWindow", "Force restart"))
+        self.ui.setUAC.setText(_translate("MainWindow", "Set UAC"))
+        self.ui.systeminfobut.setText(_translate("MainWindow", "System Info"))
+        self.ui.LogOff_Buttun.setText(_translate("MainWindow", "Force logout"))
+        self.ui.End_not_system_process_Buttun.setText(_translate("MainWindow", "End all non-system processes"))
+        self.ui.CMD_box.setTitle(_translate("MainWindow", "CMD Command"))
+        self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">Please enter CMD command</span ></p></body></html>"))
+        self.ui.RunDos.setText(_translate("MainWindow", "Execute"))
+        self.ui.Output_text.setText(_translate("MainWindow", "<html><head/><body><p>Output(beta):</p></body></html>"))
+        self.ui.Disable_exe_box.setTitle(_translate("MainWindow", "Disable program to run"))
+        self.ui.Disable_exe_run_text.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">Please enter the process name to be disabled </span></p></body></html>"))
+        self.ui.Disable_exe_run_text_Buttun.setText(_translate("MainWindow", "OK"))
+        self.ui.Disable_exe_run_list_text.setText(_translate("MainWindow", "<html><head/><body><p>Disabled program run list:</p></body></html>"))
+        self.ui.Explorer_setting_show_file_extension_check.setText(_translate("MainWindow", "Show file extension"))
+        self.ui.Explorer_setting_show_hide_file_check.setText(_translate("MainWindow", "Show hidden files"))
+        self.ui.Explorer_setting_show_hide_system_file_check.setText(_translate("MainWindow", "Show system protected files"))
+        self.ui.Taskmgr_Button.setText(_translate("MainWindow", "Taskmgr"))
+        self.ui.Powershell_Button.setText(_translate("MainWindow", "Powershell"))
+        self.ui.Regedit_Button.setText(_translate("MainWindow", "Regedit"))
+        self.ui.Cmd_Button.setText(_translate("MainWindow", "Cmd"))
+        self.ui.Gpedit_Button.setText(_translate("MainWindow", "Gpedit"))
+        self.ui.Control_Button.setText(_translate("MainWindow", "Control"))
+        self.ui.MMC_Button.setText(_translate("MainWindow", "MMC"))
+        self.ui.Calc_Button.setText(_translate("MainWindow", "Calc"))
+        self.ui.Compmgmt_Button.setText(_translate("MainWindow", "Compmgmt"))
+        self.ui.Devmgmt_Button.setText(_translate("MainWindow", "Devmgmt"))
+        self.ui.Dxdiag_Button.setText(_translate("MainWindow", "Dxdiag"))
+        self.ui.Lusrmgr_Button.setText(_translate("MainWindow", "Lusrmgr"))
+        self.ui.Magnify_Button.setText(_translate("MainWindow", "Magnify"))
+        self.ui.Msinfo32_Button.setText(_translate("MainWindow", "Msinfo32"))
+        self.ui.Winver_Button.setText(_translate("MainWindow", "Winver"))
+        self.ui.hint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">Running status:</span> </p></body></html>"))
+        self.ui.stoping.setText(_translate("MainWindow", "stop"))
+        self.ui.Running.setText(_translate("MainWindow", "Running"))
+        self.ui.windowhint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">Please enter the pop-up window to be blocked Process name</span></p></body></html>"))
+        self.ui.windowhint_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">or directly select the running window </span></p></body></html>"))
+        self.ui.windowkillbut.setText(_translate("MainWindow", "OK"))
+        self.ui.windowkilllist.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">Pop-up blocker list</span ></p></body></html>"))
+        self.ui.WinTWS.setText(_translate("MainWindow", "WinTWS"))
+        self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">DLL called by the analyzed file and functions and descriptions</span></p></body></html>"))
+        self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">Filename:</span> </p></body></html>"))
+        self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">File path:</span> </p></body></html>"))
+        self.ui.execheck.setText(_translate("MainWindow", "File Analysis"))
+        self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">hint:</span>< /p></body></html>"))
+        self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
+        self.ui.Process_manage_Button.setText(_translate("MainWindow", "Process Management"))
+        self.ui.Utilities_Button.setText(_translate("MainWindow", "Utilities"))
+        self.ui.System_Button.setText(_translate("MainWindow", "System"))
+        self.ui.File_analyze_Button.setText(_translate("MainWindow", "File Analysis"))
+        self.ui.SystemApp_Button.setText(_translate("MainWindow", "System App"))
+        self.ui.WindowBlocking_Button.setText(_translate("MainWindow", "Popup Blocking"))
+        self.ui.about_us.setText(_translate("MainWindow", "about"))
+        self.ui.action_t.setText(_translate("MainWindow", "t"))
 
     def chinese_t(self):
-        if self.language == 1:
-            text = 'Are you sure you want to switch languages?'
-        if self.language == 2:
-            text = '確定要切換語言嗎?'
-        if self.language == 3:
-            text = '确定要切换语言吗?'
-        qusetion = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
-        if qusetion == 16384:
-            self.language = 2
-            _translate = QtCore.QCoreApplication.translate
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools),"工具")
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.process),"進程")
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System),"系統")
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe),"系統程式")
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Windowkill),"窗口攔截")
-            self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
-            self.ui.processname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">名稱</span></p></body></html>"))
-            self.ui.processPID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
-            self.ui.processfile.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe路徑</span></p></body></html>"))
-            self.ui.hwnd.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">句柄:</span></p></body></html>"))
-            self.ui.exeuser.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">使用者名稱:</span></p></body></html>"))
-            self.ui.resetexplorerbut.setText(_translate("MainWindow", "重啟資源管理器"))
-            self.ui.cleanuserpwbut.setText(_translate("MainWindow", "清除用戶密碼"))
-            self.ui.fixlimitbut.setText(_translate("MainWindow", "解除系統限制"))
-            self.ui.fiximgbut.setText(_translate("MainWindow", "修復打開方式"))
-            self.ui.fixiconbut.setText(_translate("MainWindow", "修復程式圖標"))
-            self.ui.fixexeimgbut.setText(_translate("MainWindow", "修復映像劫持"))
-            self.ui.Shutdownbut.setText(_translate("MainWindow", "強制關機"))
-            self.ui.resetbut.setText(_translate("MainWindow", "強制重啟"))
-            self.ui.setUAC.setText(_translate("MainWindow", "設定UAC"))
-            self.ui.systeminfobut.setText(_translate("MainWindow", "系統資訊"))
-            self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">CMD命令</span></p></body></html>"))
-            self.ui.RunDos.setText(_translate("MainWindow", "執行"))
-            self.ui.Taskbut.setText(_translate("MainWindow", "Taskmgr"))
-            self.ui.Powershellbut.setText(_translate("MainWindow", "Powershell"))
-            self.ui.regebut.setText(_translate("MainWindow", "Regedit"))
-            self.ui.cmdbut.setText(_translate("MainWindow", "Cmd"))
-            self.ui.Gpeditbut.setText(_translate("MainWindow", "Gpedit"))
-            self.ui.controlbut.setText(_translate("MainWindow", "Control"))
-            self.ui.MMCbut.setText(_translate("MainWindow", "MMC"))
-            self.ui.windowhint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">請輸入要攔截窗口的名稱</span></p></body></html>"))
-            self.ui.windowkillbut.setText(_translate("MainWindow", "確定"))
-            self.ui.windowkilllist.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">攔截窗口名單</span></p></body></html>"))
-            self.ui.hint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">運行狀態:</span></p></body></html>"))
-            self.ui.stoping.setText(_translate("MainWindow", "停止"))
-            self.ui.Running.setText(_translate("MainWindow", "運行"))
-            self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件名:</span></p></body></html>"))
-            self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件路徑:</span></p></body></html>"))
-            self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">受分析的文件調用的DLL及函數及說明</span></p></body></html>"))
-            self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">危險程度:</span></p></body></html>"))
-            self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
-            self.ui.menu.setTitle(_translate("MainWindow", "功能"))
-            self.ui.menu_3.setTitle(_translate("MainWindow", "語言"))
-            self.ui.menu_2.setTitle(_translate("MainWindow", "關於"))
-            self.ui.video_view.setText(_translate("MainWindow", "video view"))
-            self.ui.Close.setText(_translate("MainWindow", "關閉"))
-            self.ui.about_us.setText(_translate("MainWindow", "about"))
-            self.ui.English.setText(_translate("MainWindow", "English"))
-            self.ui.Chinese_T.setText(_translate("MainWindow", "traditional Chinese"))
-            self.ui.Chinese_S.setText(_translate("MainWindow", "Simplified Chinese"))
-            self.ui.hwnd.setText(_translate("MainWindow", "句柄:"))
-            self.ui.windowhint_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">或直接選擇正在運行的窗口</span></p></body></html>"))
-            self.ui.windowlistupdate.setText(_translate("MainWindow", "刷新"))
-            self.ui.fixlimitbut.setGeometry(QtCore.QRect(10, 10, 90, 30))
-            self.ui.fiximgbut.setGeometry(QtCore.QRect(110, 10, 90, 30))
-            self.ui.resetexplorerbut.setGeometry(QtCore.QRect(510, 10, 90, 30))
-            self.ui.cleanuserpwbut.setGeometry(QtCore.QRect(410, 10, 90, 30))
-            self.ui.fixiconbut.setGeometry(QtCore.QRect(310, 10, 90, 30))
-            self.ui.fixexeimgbut.setGeometry(QtCore.QRect(210, 10, 90, 30))
-            self.ui.Shutdownbut.setGeometry(QtCore.QRect(10, 10, 80, 30))
-            self.ui.resetbut.setGeometry(QtCore.QRect(100, 10, 80, 30))
-            self.ui.setUAC.setGeometry(QtCore.QRect(190, 10, 80, 30))
+        self.language = 2
+        _translate = QtCore.QCoreApplication.translate
+        self.ui.Process_name.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">名稱</span></p></body></html>"))
+        self.ui.Process_PID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
+        self.ui.Process_path.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe路徑</span></p></body></html>"))
+        self.ui.Hwnd.setText(_translate("MainWindow", "<html><head/><body><p>句柄:</p></body></html>"))
+        self.ui.UserName.setText(_translate("MainWindow", "<html><head/><body><p>使用者名稱:</p></body></html>"))
+        self.ui.Process_total.setText(_translate("MainWindow", "<html><head/><body><p>進程總數:</p></body></html>"))
+        self.ui.Fix_limit_Button.setText(_translate("MainWindow", "解除系統限制"))
+        self.ui.Fix_file_icon_Button.setText(_translate("MainWindow", "修復程式圖標"))
+        self.ui.Clear_user_password_Button.setText(_translate("MainWindow", "清除用戶密碼"))
+        self.ui.Reopen_explorer_Button.setText(_translate("MainWindow", "重啟資源管理器"))
+        self.ui.Fix_IEFO_Button.setText(_translate("MainWindow", "修復映像劫持"))
+        self.ui.Fix_file_open_way_Button.setText(_translate("MainWindow", "修復打開方式"))
+        self.ui.recover_Wallpaper_Button.setText(_translate("MainWindow", "恢復默認桌布"))
+        self.ui.Shutdownbut.setText(_translate("MainWindow", "強制關機"))
+        self.ui.resetbut.setText(_translate("MainWindow", "強制重啟"))
+        self.ui.setUAC.setText(_translate("MainWindow", "設定UAC"))
+        self.ui.systeminfobut.setText(_translate("MainWindow", "系統資訊"))
+        self.ui.LogOff_Buttun.setText(_translate("MainWindow", "強制登出"))
+        self.ui.End_not_system_process_Buttun.setText(_translate("MainWindow", "結束所有非系統進程"))
+        self.ui.CMD_box.setTitle(_translate("MainWindow", "CMD命令"))
+        self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">請輸入CMD命令</span></p></body></html>"))
+        self.ui.RunDos.setText(_translate("MainWindow", "執行"))
+        self.ui.Output_text.setText(_translate("MainWindow", "<html><head/><body><p>輸出(beta):</p></body></html>"))
+        self.ui.Disable_exe_box.setTitle(_translate("MainWindow", "禁止程式運行"))
+        self.ui.Disable_exe_run_text.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">請輸入要禁止的進程名</span></p></body></html>"))
+        self.ui.Disable_exe_run_text_Buttun.setText(_translate("MainWindow", "確定"))
+        self.ui.Disable_exe_run_list_text.setText(_translate("MainWindow", "<html><head/><body><p>禁止程式運行的名單:</p></body></html>"))
+        self.ui.Explorer_setting_show_file_extension_check.setText(_translate("MainWindow", "顯示文件副檔名"))
+        self.ui.Explorer_setting_show_hide_file_check.setText(_translate("MainWindow", "顯示隱藏檔案"))
+        self.ui.Explorer_setting_show_hide_system_file_check.setText(_translate("MainWindow", "顯示受系統保護的文件"))
+        self.ui.Taskmgr_Button.setText(_translate("MainWindow", "Taskmgr"))
+        self.ui.Powershell_Button.setText(_translate("MainWindow", "Powershell"))
+        self.ui.Regedit_Button.setText(_translate("MainWindow", "Regedit"))
+        self.ui.Cmd_Button.setText(_translate("MainWindow", "Cmd"))
+        self.ui.Gpedit_Button.setText(_translate("MainWindow", "Gpedit"))
+        self.ui.Control_Button.setText(_translate("MainWindow", "Control"))
+        self.ui.MMC_Button.setText(_translate("MainWindow", "MMC"))
+        self.ui.Calc_Button.setText(_translate("MainWindow", "Calc"))
+        self.ui.Compmgmt_Button.setText(_translate("MainWindow", "Compmgmt"))
+        self.ui.Devmgmt_Button.setText(_translate("MainWindow", "Devmgmt"))
+        self.ui.Dxdiag_Button.setText(_translate("MainWindow", "Dxdiag"))
+        self.ui.Lusrmgr_Button.setText(_translate("MainWindow", "Lusrmgr"))
+        self.ui.Magnify_Button.setText(_translate("MainWindow", "Magnify"))
+        self.ui.Msinfo32_Button.setText(_translate("MainWindow", "Msinfo32"))
+        self.ui.Winver_Button.setText(_translate("MainWindow", "Winver"))
+        self.ui.hint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">運行狀態:</span></p></body></html>"))
+        self.ui.stoping.setText(_translate("MainWindow", "停止"))
+        self.ui.Running.setText(_translate("MainWindow", "運行"))
+        self.ui.windowhint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">請輸入要攔截的彈窗進程名</span></p></body></html>"))
+        self.ui.windowhint_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">或直接選擇正在運行的窗口</span></p></body></html>"))
+        self.ui.windowkillbut.setText(_translate("MainWindow", "確定"))
+        self.ui.windowkilllist.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">彈窗攔截名單</span></p></body></html>"))
+        self.ui.WinTWS.setText(_translate("MainWindow", "WinTWS"))
+        self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">受分析的文件調用的DLL及函數及說明</span></p></body></html>"))
+        self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件名:</span></p></body></html>"))
+        self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件路徑:</span></p></body></html>"))
+        self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
+        self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">提示:</span></p></body></html>"))
+        self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
+        self.ui.Process_manage_Button.setText(_translate("MainWindow", "進程管理"))
+        self.ui.Utilities_Button.setText(_translate("MainWindow", "實用工具"))
+        self.ui.System_Button.setText(_translate("MainWindow", "系統"))
+        self.ui.File_analyze_Button.setText(_translate("MainWindow", "文件分析"))
+        self.ui.SystemApp_Button.setText(_translate("MainWindow", "系統程式"))
+        self.ui.WindowBlocking_Button.setText(_translate("MainWindow", "彈窗攔截"))
+        self.ui.about_us.setText(_translate("MainWindow", "about"))
+        self.ui.action_t.setText(_translate("MainWindow", " t"))
 
     def chinese_s(self):
-        if self.language == 1:
-            text = 'Are you sure you want to switch languages?'
-        if self.language == 2:
-            text = '確定要切換語言嗎?'
-        if self.language == 3:
-            text = '确定要切换语言吗?'
-        qusetion = QMessageBox.warning(self,'warning',text,QMessageBox.Yes|QMessageBox.No)
-        if qusetion == 16384:
-            self.language = 3
-            _translate = QtCore.QCoreApplication.translate
-            self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
-            self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">CMD命令</span></p></body></html>"))
-            self.ui.RunDos.setText(_translate("MainWindow", "执行"))
-            self.ui.exeuser.setText(_translate("MainWindow", "软件分析"))
-            self.ui.processname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">名称</span></p></body></html>"))
-            self.ui.processPID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
-            self.ui.processfile.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe路径</span></p></body></html>"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.process), _translate("MainWindow", "进程"))
-            self.ui.resetexplorerbut.setText(_translate("MainWindow", "重启Explorer"))
-            self.ui.cleanuserpwbut.setText(_translate("MainWindow", "清除用户密码"))
-            self.ui.fixlimitbut.setText(_translate("MainWindow", "解除系统限制"))
-            self.ui.fiximgbut.setText(_translate("MainWindow", "修复打开方式"))
-            self.ui.fixiconbut.setText(_translate("MainWindow", "修复软件图标"))
-            self.ui.fixexeimgbut.setText(_translate("MainWindow", "修复映像劫持"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Tools), _translate("MainWindow", "工具"))
-            self.ui.Taskbut.setText(_translate("MainWindow", "Taskmgr"))
-            self.ui.Powershellbut.setText(_translate("MainWindow", "Powershell"))
-            self.ui.regebut.setText(_translate("MainWindow", "Regedit"))
-            self.ui.cmdbut.setText(_translate("MainWindow", "Cmd"))
-            self.ui.Gpeditbut.setText(_translate("MainWindow", "Gpedit"))
-            self.ui.controlbut.setText(_translate("MainWindow", "Control"))
-            self.ui.MMCbut.setText(_translate("MainWindow", "MMC"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.Sysexe), _translate("MainWindow", "系统软件"))
-            self.ui.Shutdownbut.setText(_translate("MainWindow", "强制关机"))
-            self.ui.resetbut.setText(_translate("MainWindow", "强制重启"))
-            self.ui.setUAC.setText(_translate("MainWindow", "设定UAC"))
-            self.ui.systeminfobut.setText(_translate("MainWindow", "系统信息"))
-            self.ui.Toolsmenu.setTabText(self.ui.Toolsmenu.indexOf(self.ui.System), _translate("MainWindow", "系统"))
-            self.ui.menu.setTitle(_translate("MainWindow", "功能"))
-            self.ui.menu_3.setTitle(_translate("MainWindow", "语言"))
-            self.ui.menu_2.setTitle(_translate("MainWindow", "关于"))
-            self.ui.Close.setText(_translate("MainWindow", "关闭"))
-            self.ui.about_us.setText(_translate("MainWindow", "关于"))
-            self.ui.English.setText(_translate("MainWindow", "英语"))
-            self.ui.Chinese_T.setText(_translate("MainWindow", "繁体中文"))
-            self.ui.Chinese_S.setText(_translate("MainWindow", "简体中文"))
-            self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件名:</span></p></body></html>"))
-            self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件路径:</span></p></body></html>"))
-            self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">受分析的文件调用的DLL及函数及说明</span></p></body></html>"))
-            self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">危险程度:</span></p></body></html>"))
-            self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
-            self.ui.menu.setTitle(_translate("MainWindow", "功能"))
-            self.ui.windowhint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">请输入要拦截窗口的名称</span></p></body></html>"))
-            self.ui.windowkillbut.setText(_translate("MainWindow", "确定"))
-            self.ui.windowkilllist.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">拦截窗口名单</span></p></body></html>"))
-            self.ui.hint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">运行状态:</span></p></body></html>"))
-            self.ui.stoping.setText(_translate("MainWindow", "停止"))
-            self.ui.Running.setText(_translate("MainWindow", "运行"))
-            self.ui.hwnd.setText(_translate("MainWindow", "句柄:"))
-            self.ui.windowhint_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">或直接选择正在运行的窗口</span></p></body></html>"))
-            self.ui.windowlistupdate.setText(_translate("MainWindow", "刷新"))
-            self.ui.fixlimitbut.setGeometry(QtCore.QRect(10, 10, 90, 30))
-            self.ui.fiximgbut.setGeometry(QtCore.QRect(110, 10, 90, 30))
-            self.ui.resetexplorerbut.setGeometry(QtCore.QRect(510, 10, 90, 30))
-            self.ui.cleanuserpwbut.setGeometry(QtCore.QRect(410, 10, 90, 30))
-            self.ui.fixiconbut.setGeometry(QtCore.QRect(310, 10, 90, 30))
-            self.ui.fixexeimgbut.setGeometry(QtCore.QRect(210, 10, 90, 30))
-            self.ui.Shutdownbut.setGeometry(QtCore.QRect(10, 10, 80, 30))
-            self.ui.resetbut.setGeometry(QtCore.QRect(100, 10, 80, 30))
-            self.ui.setUAC.setGeometry(QtCore.QRect(190, 10, 80, 30))
+        self.language = 3
+        _translate = QtCore.QCoreApplication.translate
+        self.ui.Process_name.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">名称</span></p></body></html>"))
+        self.ui.Process_PID.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">PID</span></p></body></html>"))
+        self.ui.Process_path.setText(_translate("MainWindow", "<html><head/><body><p align=\"justify\"><span style=\" font-size:12pt;\">exe路径</span></p></body></html>"))
+        self.ui.Hwnd.setText(_translate("MainWindow", "<html><head/><body><p>句柄:</p></body></html>"))
+        self.ui.UserName.setText(_translate("MainWindow", "<html><head/><body><p>使用者名称:</p></body></html>"))
+        self.ui.Process_total.setText(_translate("MainWindow", "<html><head/><body><p>进程总数:</p></body></html>"))
+        self.ui.Fix_limit_Button.setText(_translate("MainWindow", "解除系统限制"))
+        self.ui.Fix_file_icon_Button.setText(_translate("MainWindow", "修复程式图标"))
+        self.ui.Clear_user_password_Button.setText(_translate("MainWindow", "清除用户密码"))
+        self.ui.Reopen_explorer_Button.setText(_translate("MainWindow", "重启资源管理器"))
+        self.ui.Fix_IEFO_Button.setText(_translate("MainWindow", "修复映像劫持"))
+        self.ui.Fix_file_open_way_Button.setText(_translate("MainWindow", "修复打开方式"))
+        self.ui.recover_Wallpaper_Button.setText(_translate("MainWindow", "恢复默认壁纸"))
+        self.ui.Shutdownbut.setText(_translate("MainWindow", "强制关机"))
+        self.ui.resetbut.setText(_translate("MainWindow", "强制重启"))
+        self.ui.setUAC.setText(_translate("MainWindow", "设定UAC"))
+        self.ui.systeminfobut.setText(_translate("MainWindow", "系统资讯"))
+        self.ui.LogOff_Buttun.setText(_translate("MainWindow", "强制登出"))
+        self.ui.End_not_system_process_Buttun.setText(_translate("MainWindow", "结束所有非系统进程"))
+        self.ui.CMD_box.setTitle(_translate("MainWindow", "CMD命令"))
+        self.ui.Dostext.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">请输入CMD命令</span></p></body></html>"))
+        self.ui.RunDos.setText(_translate("MainWindow", "执行"))
+        self.ui.Output_text.setText(_translate("MainWindow", "<html><head/><body><p>输出(beta):</p></body></html>"))
+        self.ui.Disable_exe_box.setTitle(_translate("MainWindow", "禁止软件运行"))
+        self.ui.Disable_exe_run_text.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">请输入要禁止的进程名</span></p></body></html>"))
+        self.ui.Disable_exe_run_text_Buttun.setText(_translate("MainWindow", "确定"))
+        self.ui.Disable_exe_run_list_text.setText(_translate("MainWindow", "<html><head/><body><p>禁止软件运行的名单:</p></body></html>"))
+        self.ui.Explorer_setting_show_file_extension_check.setText(_translate("MainWindow", "显示文件后缀名"))
+        self.ui.Explorer_setting_show_hide_file_check.setText(_translate("MainWindow", "显示隐藏档案"))
+        self.ui.Explorer_setting_show_hide_system_file_check.setText(_translate("MainWindow", "显示受系统保护的文件"))
+        self.ui.Taskmgr_Button.setText(_translate("MainWindow", "Taskmgr"))
+        self.ui.Powershell_Button.setText(_translate("MainWindow", "Powershell"))
+        self.ui.Regedit_Button.setText(_translate("MainWindow", "Regedit"))
+        self.ui.Cmd_Button.setText(_translate("MainWindow", "Cmd"))
+        self.ui.Gpedit_Button.setText(_translate("MainWindow", "Gpedit"))
+        self.ui.Control_Button.setText(_translate("MainWindow", "Control"))
+        self.ui.MMC_Button.setText(_translate("MainWindow", "MMC"))
+        self.ui.Calc_Button.setText(_translate("MainWindow", "Calc"))
+        self.ui.Compmgmt_Button.setText(_translate("MainWindow", "Compmgmt"))
+        self.ui.Devmgmt_Button.setText(_translate("MainWindow", "Devmgmt"))
+        self.ui.Dxdiag_Button.setText(_translate("MainWindow", "Dxdiag"))
+        self.ui.Lusrmgr_Button.setText(_translate("MainWindow", "Lusrmgr"))
+        self.ui.Magnify_Button.setText(_translate("MainWindow", "Magnify"))
+        self.ui.Msinfo32_Button.setText(_translate("MainWindow", "Msinfo32"))
+        self.ui.Winver_Button.setText(_translate("MainWindow", "Winver"))
+        self.ui.hint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">运行状态:</span></p></body></html>"))
+        self.ui.stoping.setText(_translate("MainWindow", "停止"))
+        self.ui.Running.setText(_translate("MainWindow", "运行"))
+        self.ui.windowhint.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">请输入要拦截的弹窗进程名</span></p></body></html>"))
+        self.ui.windowhint_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">或直接选择正在运行的窗口</span></p></body></html>"))
+        self.ui.windowkillbut.setText(_translate("MainWindow", "确定"))
+        self.ui.windowkilllist.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">弹窗拦截名单</span></p></body></html>"))
+        self.ui.WinTWS.setText(_translate("MainWindow", "WinTWS"))
+        self.ui.execheckabout.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">受分析的文件调用的DLL及函数及说明</span></p></body></html>"))
+        self.ui.execheckname.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件名:</span></p></body></html>"))
+        self.ui.execheckpath.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">文件路径:</span></p></body></html>"))
+        self.ui.execheck.setText(_translate("MainWindow", "文件分析"))
+        self.ui.Danger_degree.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:12pt;\">提示:</span></p></body></html>"))
+        self.ui.Danger_degreeview.setText(_translate("MainWindow", "0"))
+        self.ui.Process_manage_Button.setText(_translate("MainWindow", "进程管理"))
+        self.ui.Utilities_Button.setText(_translate("MainWindow", "实用工具"))
+        self.ui.System_Button.setText(_translate("MainWindow", "系统"))
+        self.ui.File_analyze_Button.setText(_translate("MainWindow", "文件分析"))
+        self.ui.SystemApp_Button.setText(_translate("MainWindow", "系统程式"))
+        self.ui.WindowBlocking_Button.setText(_translate("MainWindow", "弹窗拦截"))
+        self.ui.about_us.setText(_translate("MainWindow", "about"))
+        self.ui.action_t.setText(_translate("MainWindow", " t"))
 
     def killprocess(self,exe):
         si = subprocess.STARTUPINFO()
@@ -1008,6 +1461,102 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             import win32api
             win32api.ShellExecute( 0, 'open' , 'gpedit.msc' , None ,None , 1 )
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Calc(self):
+        try:
+            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\calc.exe')
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Compmgmt(self):
+        try:
+            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\compmgmt.msc' , None ,None , 1 )
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Devmgmt(self):
+        try:
+            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\devmgmt.msc' , None ,None , 1 )
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+    
+    def Dxdiag(self):
+        try:
+            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\dxdiag.exe')
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Lusrmgr(self):
+        try:
+            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\lusrmgr.msc' , None ,None , 1 )
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Magnify(self):
+        try:
+            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\Magnify.exe' , None ,None , 1 )
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+    
+    def Msinfo32(self):
+        try:
+            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\msinfo32.exe')
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+
+    def Winver(self):
+        try:
+            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\winver.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'

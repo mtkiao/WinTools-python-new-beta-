@@ -13,24 +13,42 @@ class setting_controller(QtWidgets.QMainWindow):
     def setup_control(self):
         self.ui.Minimize_Check.stateChanged.connect(self.main_update)
         self.ui.Main_Top_Check.stateChanged.connect(self.main_update)
+        self.ui.English_Radio.clicked.connect(self.language)
+        self.ui.Simplified_Chinese_Radio.clicked.connect(self.language)
+        self.ui.Traditional_Chinese_Radio.clicked.connect(self.language)
+
         if not os.path.isfile(r'./stg.ini'):
-            with open('stg.ini',mode='w',encoding='utf-8') as file:
-                file.write('[app]')
-                file.write('\n\n[Setting]\nMinimize = True\nMain_top = False')
+            self.Create_ini_file()
         self.config = configparser.RawConfigParser()
         self.config.optionxform = str
         self.config.read('stg.ini')
+        try:
+            self.Setting_check()
+        except:
+            self.Create_ini_file()
+            self.Setting_check()
+
+    def Create_ini_file(self):
+        with open('stg.ini',mode='w',encoding='utf-8') as file:
+            file.write('[app]\n\n[Setting]\nMinimize = True\nMain_top = False\nLanguage = Traditional_Chinese')
+
+    def Setting_check(self):
         self.Main_top = self.config.get('Setting','Main_top')
         self.Minimize = self.config.get('Setting','Minimize')
+        self.Language_value = self.config.get('Setting','Language')
+
         if self.Main_top == 'True':
             self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
             self.ui.Main_Top_Check.setChecked(True)
-        else:
-            self.ui.Main_Top_Check.setChecked(False)
         if self.Minimize == 'True':
             self.ui.Minimize_Check.setChecked(True)
-        else:
-            self.ui.Minimize_Check.setChecked(False)
+        
+        if self.Language_value == 'Traditional_Chinese':
+            self.ui.Traditional_Chinese_Radio.setChecked(True)
+        elif self.Language_value == 'English':
+            self.ui.English_Radio.setChecked(True)
+        elif self.Language_value == 'Simplified_Chinese':
+            self.ui.Simplified_Chinese_Radio.setChecked(True)
 
     def main_update(self):
         if self.ui.Main_Top_Check.isChecked():
@@ -48,6 +66,17 @@ class setting_controller(QtWidgets.QMainWindow):
             self.config.write(open('stg.ini', 'w'))
         elif self.ui.Minimize_Check.isCheckable():
             self.config.set('Setting','Minimize',False)
+            self.config.write(open('stg.ini', 'w'))
+
+    def language(self):
+        if self.ui.English_Radio.isChecked():
+            self.config.set('Setting','Language', 'English')
+            self.config.write(open('stg.ini', 'w'))
+        elif self.ui.Simplified_Chinese_Radio.isChecked():
+            self.config.set('Setting','Language', 'Simplified_Chinese')
+            self.config.write(open('stg.ini', 'w'))
+        elif self.ui.Traditional_Chinese_Radio.isChecked():
+            self.config.set('Setting','Language', 'Traditional_Chinese')
             self.config.write(open('stg.ini', 'w'))
 
 if __name__ == "__main__":
