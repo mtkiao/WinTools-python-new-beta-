@@ -613,7 +613,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 except:
                     pass
                 try:
-                    win32api.RegDeleteValue(key, 'NoViewContextMenu')
+                    win32api.RegDeleteValue(key, 'NoViewContexMenu')
                 except:
                     pass
                 try:
@@ -642,6 +642,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     pass
                 try:
                     win32api.RegDeleteValue(key, 'NoActiveDesktop')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetActiveDesktop')
                 except:
                     pass
                 try:
@@ -681,7 +685,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 except:
                     pass
                 try:
-                    win32api.RegDeleteValue(key, 'NoWindowUpdate')
+                    win32api.RegDeleteValue(key, 'NoWindowsUpdate')
                 except:
                     pass
                 try:
@@ -702,6 +706,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     pass
                 try:
                     win32api.RegDeleteValue(key, 'DisableLockWorkstation')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoManageMyComputerVerb')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'RestrictRun')
                 except:
                     pass
                 win32api.RegCloseKey(key)
@@ -776,7 +788,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 except:
                     pass
                 try:
-                    win32api.RegDeleteValue(key, 'NoViewContextMenu')
+                    win32api.RegDeleteValue(key, 'NoViewContexMenu')
                 except:
                     pass
                 try:
@@ -805,6 +817,10 @@ class MainWindow(QtWidgets.QMainWindow):
                     pass
                 try:
                     win32api.RegDeleteValue(key, 'NoActiveDesktop')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoSetActiveDesktop')
                 except:
                     pass
                 try:
@@ -844,7 +860,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 except:
                     pass
                 try:
-                    win32api.RegDeleteValue(key, 'NoWindowUpdate')
+                    win32api.RegDeleteValue(key, 'NoWindowsUpdate')
                 except:
                     pass
                 try:
@@ -865,6 +881,14 @@ class MainWindow(QtWidgets.QMainWindow):
                     pass
                 try:
                     win32api.RegDeleteValue(key, 'DisableLockWorkstation')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'NoManageMyComputerVerb')
+                except:
+                    pass
+                try:
+                    win32api.RegDeleteValue(key, 'RestrictRun')
                 except:
                     pass
                 win32api.RegCloseKey(key)
@@ -2051,7 +2075,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
                     win32api.RegCreateKey(key,'DisallowRun')
                     key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                win32api.RegSetValueEx(key, exe_name, 0, win32con.REG_SZ, exe_name)
+                try:
+                    win32api.RegSetValueEx(key, exe_name, 0, win32con.REG_SZ, exe_name)
+                except:
+                    if self.language == 1:
+                        text = 'access denied'
+                    if self.language == 2:
+                        text = '存取被拒'
+                    if self.language == 3:
+                        text = '存取被拒'   
+                    QMessageBox.critical(self,'error',text,QMessageBox.Ok)
                 self.update_Disable_exe_list()
         win32api.RegCloseKey(key)
 
@@ -2126,6 +2159,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def about(self):
         QMessageBox.information(self,'about','made by mtkiao129(litesans)')
+
+    # def Rundos_th(self):
+    #     import threading
+    #     Aasd = threading.Thread(target=self.Rundos)
+    #     Aasd.start()
+    #     return
 
     def Rundos(self):
         dos = self.ui.Dos.text()
