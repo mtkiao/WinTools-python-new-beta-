@@ -7,6 +7,7 @@ try:
     from PyQt5 import QtWidgets,QtCore
     from Main_UI import Ui_MainWindow
     from systeminfo import Ui_info
+    import about
     import Setting_Console
     import os
     from library import fun_list
@@ -36,7 +37,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Control_Button.clicked.connect(self.control)
         self.ui.MMC_Button.clicked.connect(self.MMC)
         self.ui.Gpedit_Button.clicked.connect(self.Gpedit)
-
         self.ui.Calc_Button.clicked.connect(self.Calc)
         self.ui.Compmgmt_Button.clicked.connect(self.Compmgmt)
         self.ui.Devmgmt_Button.clicked.connect(self.Devmgmt)
@@ -45,6 +45,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ui.Magnify_Button.clicked.connect(self.Magnify)
         self.ui.Msinfo32_Button.clicked.connect(self.Msinfo32)
         self.ui.Winver_Button.clicked.connect(self.Winver)
+        self.ui.Msconfig_Button.clicked.connect(self.msconfig)
 
         # Utilities
         self.ui.Utilities_Button.clicked.connect(self.changeUtilities)
@@ -1022,12 +1023,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def recover_Wallpaper(self):
         if self.language == 1:
-            text = 'Are you sure you want to repair the file open method?'
+            text = 'Are you sure you want to restore the default wallpaper?'
         if self.language == 2:
-            text = '確定要修復文件打開方式嗎?'
+            text = '確定要恢復默認桌布嗎?'
         if self.language == 3:
-            text = '确定要修复文件打开方式吗?'
-        question = QMessageBox.warning(self,'Fixexeopen',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
+            text = '确定要恢复默认壁纸吗?'
+        question = QMessageBox.warning(self,'wallpaper',text,QMessageBox.Yes|QMessageBox.No,QMessageBox.Yes)
         if question == 16384:
             try:
                 try:
@@ -1037,16 +1038,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     win32api.RegCreateKey(key,'Wallpapers')
                     key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(key, 'BackgroundHistoryPath0', win32con.REG_SZ, r'c:\windows\web\wallpaper\windows\img0.jpg')
-                win32api.RegSetValue(key, 'BackgroundHistoryPath1', win32con.REG_SZ, r'c:\windows\web\wallpaper\theme1\img1.jpg')
-                win32api.RegSetValue(key, 'BackgroundHistoryPath2', win32con.REG_SZ, r'c:\windows\web\wallpaper\theme1\img13.jpg')
-                win32api.RegSetValue(key, 'BackgroundHistoryPath3', win32con.REG_SZ, r'c:\windows\web\wallpaper\windows\img2.jpg')
-                win32api.RegSetValue(key, 'BackgroundHistoryPath4', win32con.REG_SZ, r'c:\windows\web\wallpaper\windows\img3.jpg')
+                self.user32dll.SystemParametersInfoW(20, 0, r'c:\windows\web\wallpaper\windows\img0.jpg', 0)
                 if self.language == 1:
                     text = 'Fix Wallpapers successfully!'
                 if self.language == 2:
-                    text = '修復桌布成功!'
+                    text = '恢復桌布成功!'
                 if self.language == 3:
-                    text = '修复壁纸成功!'
+                    text = '恢复壁纸成功!'
                 QMessageBox.information(self,'Done',text,QMessageBox.Ok,QMessageBox.Ok)
             except:
                 if self.language == 1:
@@ -1097,6 +1095,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\\batfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\cmdfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\inifile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'%SystemRoot%\system32\NOTEPAD.EXE %1')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\VBSfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'"%SystemRoot%\System32\WScript.exe" "%1" %*')
 
                 key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(key, 'jpegfile', win32con.REG_SZ, 'JPEG Image')
@@ -1121,12 +1127,23 @@ class MainWindow(QtWidgets.QMainWindow):
                 win32api.RegSetValue(key, 'inifile', win32con.REG_SZ, 'Configuration Settings')
                 win32api.RegSetValue(key, '.msc', win32con.REG_SZ, 'MSCfile')
                 win32api.RegSetValue(key, 'MSCfile', win32con.REG_SZ, 'Microsoft Common Console Document')
-                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
-                keyopen = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
-                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+                try:
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\exefile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\comfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\batfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\cmdfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\inifile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'%SystemRoot%\system32\NOTEPAD.EXE %1')
+                    keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\VBSfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'"%SystemRoot%\System32\WScript.exe" "%1" %*')
+                except:
+                    pass
 
                 key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FileExts',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(key, '.exe', win32con.REG_SZ, '')
@@ -1169,6 +1186,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
                 keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'scrfile\shell\open',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" /S')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'batfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'cmdfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'inifile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'%SystemRoot%\system32\NOTEPAD.EXE %1')
+                keyopen = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'VBSfile\shell\open',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'"%SystemRoot%\System32\WScript.exe" "%1" %*')
                 win32api.RegCloseKey(key)
                 win32api.RegCloseKey(keyopen)
                 if self.language == 1:
@@ -1178,7 +1203,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 if self.language == 3:
                     text = '修复文件打开方式成功!'
                 QMessageBox.information(self,'Fixexeopen',text,QMessageBox.Ok,QMessageBox.Ok)
-            except:
+            except Exception as error:
+                print(error)
                 if self.language == 1:
                     text = 'An error occurred'
                 if self.language == 2:
@@ -1408,7 +1434,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Taskmgr(self):
         try:
-            self.OpenProcess0(exe=r'C:/Windows/System32/Taskmgr.exe')
+            self.OpenProcess0(exe=r'C:/Windows/System32/taskmgr.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1446,7 +1472,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Powershell(self):
         try:
-            import win32api
             win32api.ShellExecute( 0, 'open' , 'Powershell' , None ,None , 1 )
         except:
             if self.language == 1:
@@ -1459,7 +1484,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def control(self):
         try:
-            self.OpenProcess0(exe=r'C:/Windows/System32/Control.exe')
+            self.OpenProcess0(exe=r'C:/Windows/System32/control.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1483,7 +1508,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Gpedit(self):
         try:
-            import win32api
             win32api.ShellExecute( 0, 'open' , 'gpedit.msc' , None ,None , 1 )
         except:
             if self.language == 1:
@@ -1496,7 +1520,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Calc(self):
         try:
-            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\calc.exe')
+            self.OpenProcess0(exe=r'C:/Windows/System32/calc.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1508,7 +1532,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Compmgmt(self):
         try:
-            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\compmgmt.msc' , None ,None , 1 )
+            win32api.ShellExecute( 0, 'open' , r'C:/Windows/System32/compmgmt.msc' , None ,None , 1 )
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1520,7 +1544,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Devmgmt(self):
         try:
-            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\devmgmt.msc' , None ,None , 1 )
+            win32api.ShellExecute( 0, 'open' , r'C:/Windows/System32/devmgmt.msc' , None ,None , 1 )
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1532,7 +1556,7 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def Dxdiag(self):
         try:
-            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\dxdiag.exe')
+            self.OpenProcess0(exe=r'C:/Windows/System32/dxdiag.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1544,7 +1568,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Lusrmgr(self):
         try:
-            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\lusrmgr.msc' , None ,None , 1 )
+            win32api.ShellExecute( 0, 'open' , r'C:/Windows/System32/lusrmgr.msc' , None ,None , 1 )
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1556,7 +1580,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Magnify(self):
         try:
-            win32api.ShellExecute( 0, 'open' , r'C:\Windows\SysWOW64\Magnify.exe' , None ,None , 1 )
+            win32api.ShellExecute( 0, 'open' , r'C:/Windows/System32/Magnify.exe' , None ,None , 1 )
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1568,7 +1592,7 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def Msinfo32(self):
         try:
-            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\msinfo32.exe')
+            self.OpenProcess0(exe=r'C:/Windows/System32/msinfo32.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1580,7 +1604,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def Winver(self):
         try:
-            self.OpenProcess0(exe=r'C:\Windows\SysWOW64\winver.exe')
+            self.OpenProcess0(exe=r'C:/Windows/System32/winver.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1590,10 +1614,22 @@ class MainWindow(QtWidgets.QMainWindow):
                 text = '发生错误!'
             QMessageBox.critical(self,'error',text,QMessageBox.Ok)
 
+    def msconfig(self):
+        try:
+            self.OpenProcess0(exe=r'C:/Windows/System32/msconfig.exe')
+        except:
+            if self.language == 1:
+                text = 'An error occurred!'
+            if self.language == 2:
+                text = '發生錯誤!'
+            if self.language == 3:
+                text = '发生错误!'
+            QMessageBox.critical(self,'error',text,QMessageBox.Ok)   
+
     def resetexplorer(self):
         try:
             self.killprocess('explorer.exe')
-            self.OpenProcess0(r'c:/Windows/explorer.exe')
+            self.OpenProcess0(r'C:/Windows/explorer.exe')
         except:
             if self.language == 1:
                 text = 'An error occurred!'
@@ -1804,6 +1840,16 @@ class MainWindow(QtWidgets.QMainWindow):
             except:
                 pass
             try:
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'inifile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\system32\imageres.dll,-69')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_CLASSES_ROOT,'VBSfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\System32\WScript.exe,2')
+            except:
+                pass
+            try:
                 key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\exefile',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%1')
             except:
@@ -1821,6 +1867,16 @@ class MainWindow(QtWidgets.QMainWindow):
             try:
                 key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\dllfile',0,win32con.KEY_ALL_ACCESS)
                 win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, 'C:\Windows\system32\imageres.dll,-67')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\inifile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\system32\imageres.dll,-69')
+            except:
+                pass
+            try:
+                key = win32api.RegOpenKey(win32con.HKEY_LOCAL_MACHINE,'SOFTWARE\Classes\VBSfile',0,win32con.KEY_ALL_ACCESS)
+                win32api.RegSetValue(key, 'DefaultIcon', win32con.REG_SZ, '%SystemRoot%\System32\WScript.exe,2')
             except:
                 pass
             win32api.CloseHandle(key)
@@ -2158,7 +2214,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.widget.show()
 
     def about(self):
-        QMessageBox.information(self,'about','made by mtkiao129(litesans)')
+        self.about_q = QtWidgets.QMainWindow()
+        self.about_GUI = about.Ui_About()
+        self.about_GUI.setupUi(self.about_q)
+        self.about_q.show()
 
     # def Rundos_th(self):
     #     import threading
