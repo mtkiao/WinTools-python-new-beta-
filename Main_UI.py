@@ -14,7 +14,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(961, 640)
+        MainWindow.setEnabled(True)
+        MainWindow.resize(961, 643)
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei UI")
         font.setPointSize(11)
@@ -571,11 +572,11 @@ class Ui_MainWindow(object):
 "}\n"
 "QPushButton:hover\n"
 "{\n"
-"    background-color:rgba(255, 20, 20,220);\n"
+"    background-color:rgba(240, 20, 20,220);\n"
 "}\n"
 "QPushButton:pressed\n"
 "{\n"
-"    background-color:rgba(200, 20, 20,200);\n"
+"    background-color:rgba(210, 20, 20,170);\n"
 "}")
         self.Close_Button.setText("")
         icon = QtGui.QIcon.fromTheme(":/CloseIcon/Icon/X.png")
@@ -703,6 +704,12 @@ class Ui_MainWindow(object):
         font.setStyleStrategy(QtGui.QFont.PreferAntialias)
         self.Danger_degreeview.setFont(font)
         self.Danger_degreeview.setObjectName("Danger_degreeview")
+        self.execheckinfo.raise_()
+        self.execheckview.raise_()
+        self.execheck.raise_()
+        self.Danger_degree.raise_()
+        self.Danger_degreeview.raise_()
+        self.execheckabout.raise_()
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 40, 141, 571))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
@@ -1042,15 +1049,31 @@ class Ui_MainWindow(object):
         self.WindowBlocking_Button.setFlat(False)
         self.WindowBlocking_Button.setObjectName("WindowBlocking_Button")
         self.verticalLayout.addWidget(self.WindowBlocking_Button)
+        self.WinTWS_2 = QtWidgets.QLabel(self.centralwidget)
+        self.WinTWS_2.setEnabled(True)
+        self.WinTWS_2.setGeometry(QtCore.QRect(780, 610, 171, 20))
+        font = QtGui.QFont()
+        font.setFamily("Microsoft YaHei UI")
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setUnderline(True)
+        font.setWeight(75)
+        font.setStrikeOut(False)
+        font.setKerning(False)
+        font.setStyleStrategy(QtGui.QFont.PreferAntialias)
+        self.WinTWS_2.setFont(font)
+        self.WinTWS_2.setObjectName("WinTWS_2")
+        self.SystemApp.raise_()
         self.Process.raise_()
         self.File_analyze.raise_()
         self.System.raise_()
         self.WindowBlocking.raise_()
         self.Utilities.raise_()
-        self.SystemApp.raise_()
         self.Navigation_bar.raise_()
         self.Window.raise_()
         self.horizontalLayoutWidget.raise_()
+        self.WinTWS_2.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
         self.about_us = QtWidgets.QAction(MainWindow)
         self.about_us.setObjectName("about_us")
@@ -1069,12 +1092,12 @@ class Ui_MainWindow(object):
         self.Hwnd.setText(_translate("MainWindow", "<html><head/><body><p>句柄:</p></body></html>"))
         self.UserName.setText(_translate("MainWindow", "<html><head/><body><p>使用者名稱:</p></body></html>"))
         self.Process_total.setText(_translate("MainWindow", "<html><head/><body><p>進程總數:</p></body></html>"))
-        self.Fix_limit_Button.setText(_translate("MainWindow", "解除系統限制"))
-        self.Fix_file_icon_Button.setText(_translate("MainWindow", "修復程式圖標"))
+        self.Fix_limit_Button.setText(_translate("MainWindow", "修復系統限制"))
+        self.Fix_file_icon_Button.setText(_translate("MainWindow", "修復文件圖標"))
         self.Clear_user_password_Button.setText(_translate("MainWindow", "清除用戶密碼"))
         self.Reopen_explorer_Button.setText(_translate("MainWindow", "重啟資源管理器"))
         self.Fix_IEFO_Button.setText(_translate("MainWindow", "修復映像劫持"))
-        self.Fix_file_open_way_Button.setText(_translate("MainWindow", "修復打開方式"))
+        self.Fix_file_open_way_Button.setText(_translate("MainWindow", "修復文件關聯"))
         self.recover_Wallpaper_Button.setText(_translate("MainWindow", "恢復默認桌布"))
         self.Shutdownbut.setText(_translate("MainWindow", "強制關機"))
         self.resetbut.setText(_translate("MainWindow", "強制重啟"))
@@ -1130,6 +1153,7 @@ class Ui_MainWindow(object):
         self.File_analyze_Button.setText(_translate("MainWindow", "文件分析"))
         self.SystemApp_Button.setText(_translate("MainWindow", "系統程式"))
         self.WindowBlocking_Button.setText(_translate("MainWindow", "彈窗攔截"))
+        self.WinTWS_2.setText(_translate("MainWindow", "WinTWS 2022~2022"))
         self.about_us.setText(_translate("MainWindow", "about"))
         self.action_t.setText(_translate("MainWindow", " t"))
 import UI_rc

@@ -142,7 +142,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Minimize = self.config.get('Setting','Minimize')
             self.Language_value = self.config.get('Setting','Language')
         self.Language_init()
-
+        self.The_Another_check = 0
         self.ui.stoping.setChecked(True)
         self.user32dll = windll.LoadLibrary(r"C:\Windows\System32\user32.dll") 
         self.hwnd_title2 = dict() 
@@ -1139,7 +1139,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\cmdfile\shell\open',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, '"%1" %*')
                     keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\inifile\shell\open',0,win32con.KEY_ALL_ACCESS)
-                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'%SystemRoot%\system32\NOTEPAD.EXE %1')
+                    win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'%SystemRoot%\System32\NOTEPAD.EXE %1')
                     keyopen = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER,'SOFTWARE\Classes\VBSfile\shell\open',0,win32con.KEY_ALL_ACCESS)
                     win32api.RegSetValue(keyopen, 'command', win32con.REG_SZ, r'"%SystemRoot%\System32\WScript.exe" "%1" %*')
                 except:
@@ -1698,11 +1698,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 text = '结束进程'
             self.killp = QAction(text,self)
             if self.language == 1:
-                text = 'open exe path'
+                text = 'locate file'
             if self.language == 2:
-                text = '打開exe路徑'
+                text = '定位文件'
             if self.language == 3:
-                text = '打开exe路径'
+                text = '定位文件'
             exefile = QAction(text,self)
             self.popMenu.addAction(self.killp)
             self.popMenu.addAction(exefile)
@@ -2114,35 +2114,36 @@ class MainWindow(QtWidgets.QMainWindow):
         
     def Disable_exe_run(self):
         exe_name = self.ui.Disable_exe_run_text_input.text()
-        key = win32api.RegOpenKey(win32con.HKEY_USERS,None,0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-        for item in win32api.RegEnumKeyEx(key):
-            item2 = item[0]
-            if item2[-4:] == '1001':
-                try:
-                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                except:
-                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                    win32api.RegCreateKey(key,'Explorer')
-                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                win32api.RegSetValueEx(key, 'DisallowRun', 0, win32con.REG_DWORD, 1)
-                try:
-                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                except:
-                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                    win32api.RegCreateKey(key,'DisallowRun')
-                    key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
-                try:
-                    win32api.RegSetValueEx(key, exe_name, 0, win32con.REG_SZ, exe_name)
-                except:
-                    if self.language == 1:
-                        text = 'access denied'
-                    if self.language == 2:
-                        text = '存取被拒'
-                    if self.language == 3:
-                        text = '存取被拒'   
-                    QMessageBox.critical(self,'error',text,QMessageBox.Ok)
-                self.update_Disable_exe_list()
-        win32api.RegCloseKey(key)
+        if not exe_name == '':
+            key = win32api.RegOpenKey(win32con.HKEY_USERS,None,0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+            for item in win32api.RegEnumKeyEx(key):
+                item2 = item[0]
+                if item2[-4:] == '1001':
+                    try:
+                        key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    except:
+                        key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                        win32api.RegCreateKey(key,'Explorer')
+                        key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    win32api.RegSetValueEx(key, 'DisallowRun', 0, win32con.REG_DWORD, 1)
+                    try:
+                        key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    except:
+                        key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                        win32api.RegCreateKey(key,'DisallowRun')
+                        key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    try:
+                        win32api.RegSetValueEx(key, exe_name, 0, win32con.REG_SZ, exe_name)
+                    except:
+                        if self.language == 1:
+                            text = 'access denied'
+                        if self.language == 2:
+                            text = '存取被拒'
+                        if self.language == 3:
+                            text = '存取被拒'   
+                        QMessageBox.critical(self,'error',text,QMessageBox.Ok)
+                    self.update_Disable_exe_list()
+            win32api.RegCloseKey(key)
 
     def update_Disable_exe_list(self):
         self.Disables = [] 
@@ -2152,6 +2153,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 item2 = item[0]
                 if item2[-4:] == '1001':
                     key = win32api.RegOpenKey(win32con.HKEY_USERS,item2 + r'\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun',0,win32con.KEY_ALL_ACCESS | win32con.WRITE_OWNER)
+                    if win32api.RegQueryInfoKey(key)[1] == 0:
+                        self.Disable_list=QStringListModel()
+                        self.Disable_list.setStringList(self.Disables)
+                        self.ui.Disable_exe_run_list.setModel(self.Disable_list)
                     for i in range(0,win32api.RegQueryInfoKey(key)[1]):
                         self.Disables.append(win32api.RegEnumValue(key,i)[0])
                         self.Disable_list=QStringListModel()
@@ -2161,7 +2166,6 @@ class MainWindow(QtWidgets.QMainWindow):
             pass
 
     def Disable_exe_run_del(self,pos):
-        import win32api,win32con
         try:
             self.Disable_item = self.ui.Disable_exe_run_list.selectedIndexes()
             for i in self.Disable_item:
@@ -2307,8 +2311,28 @@ class MainWindow(QtWidgets.QMainWindow):
             self.execheck.setStringList(self.execheckdll + self.execheckfun)
             self.ui.execheckview.setModel(self.execheck)
 
+    def egg_1(self):
+        import webbrowser,random
+        for i in range(50):
+            q = QMessageBox.critical(self,'explorer.exe','"0x00{}" 指令所引用的 "0x00{}" 記憶體。該記憶體不能為 "written"。\n'.format(random.randint(100000,999999),random.randint(100000,999999)),QMessageBox.Yes|QMessageBox.No,QMessageBox.No)
+            if not q == 16384:
+                break
+        if q == 16384:
+            QMessageBox.information(self,'explorer.exe','Windows 已成功修復該記憶體位置。',QMessageBox.Ok)
+            a = random.randint(1,100)
+            if a != 2:
+                webbrowser.open("http://btly.xyz/r/Krgy1du")
+            else:
+                webbrowser.open("https://www.youtube.com/watch?v=xWTiOqJqkk0")
+            
     def showMenu(self):
         self.StMenu = QMenu()
+
+        if self.The_Another_check == 9:
+            text = "explorer.exe"
+            different = QAction(text,self)
+            self.StMenu.addAction(different)
+
         if self.language == 1:
             text = 'Settings'
         if self.language == 2:
@@ -2326,12 +2350,18 @@ class MainWindow(QtWidgets.QMainWindow):
         self.StMenu.addAction(Main_settings)
         self.StMenu.addAction(Main_about)
         pos = QtCore.QPoint(0, 30)
+        self.The_Another_check = self.The_Another_check + 1
         Qusetion = self.StMenu.exec_(self.ui.Menu_Button.mapToGlobal(pos))
         if Qusetion == Main_about:
             self.about()
         if Qusetion == Main_settings:
             self.Setting_window = Setting_Console.setting_controller()
             self.Setting_window.show()
+        try:
+            if Qusetion == different:
+                self.egg_1()
+        except:
+            pass
 
 
     def createTrayIcon(self):
@@ -2426,16 +2456,17 @@ class MainWindow(QtWidgets.QMainWindow):
         pat = QPainter(self)
         pat.setRenderHint(pat.Antialiasing)
         pat.fillPath(path, QBrush(Qt.white))
-        color = QColor(192, 192, 192, 50)
-        for i in range(10):
-            i_path = QPainterPath()
-            i_path.setFillRule(Qt.WindingFill)
-            ref = QRectF(10-i, 10-i, self.width()-(10-i)*2, self.height()-(10-i)*2)
-            i_path.addRect(ref)
-            # i_path.addRoundedRect(ref, event.size().width(), event.size().height())
-            color.setAlpha(150 - i**0.5*50)
-            pat.setPen(color)
-            pat.drawPath(i_path)
+        color = QColor(0, 0, 0, 20)
+
+        i_path = QPainterPath()
+        i_path.setFillRule(Qt.WindingFill)
+        ref = QRectF(10-1, 10-1, self.width()-(10-1)*2, self.height()-(10-1)*2)
+        i_path.addRect(ref)
+        # i_path.addRoundedRect(ref, event.size().width(), event.size().height())
+        color.setAlpha(150 - 1**0.5*50)
+        pat.setPen(color)
+        pat.drawPath(i_path)
+
         # 圓角
         pat2 = QPainter(self)
         pat2.setRenderHint(pat2.Antialiasing) # 抗鋸齒
